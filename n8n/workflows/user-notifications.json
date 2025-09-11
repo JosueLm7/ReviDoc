@@ -1,0 +1,213 @@
+{
+  "name": "User Notifications Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "daily-schedule",
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.API_BASE_URL}}/users/pending-reviews",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.API_TOKEN}}"
+            }
+          ]
+        }
+      },
+      "id": "get-pending-reviews",
+      "name": "Get Pending Reviews",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process users with pending reviews\nconst users = items[0].json.users || [];\n\nreturn users.map(user => ({\n  json: {\n    userId: user._id,\n    email: user.email,\n    name: user.name,\n    pendingDocuments: user.pendingDocuments,\n    documentCount: user.pendingDocuments.length\n  }\n}));"
+      },
+      "id": "process-users",
+      "name": "Process Users",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-pending-docs",
+              "leftValue": "={{$json.documentCount}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-pending-documents",
+      "name": "Check Pending Documents",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@academic-reviewer.com",
+        "toEmail": "={{$json.email}}",
+        "subject": "Recordatorio: Documentos pendientes de revisión",
+        "emailFormat": "html",
+        "html": "<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"utf-8\">\n    <title>Recordatorio de Revisión</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333;\">\n    <div style=\"max-width: 600px; margin: 0 auto; padding: 20px;\">\n        <h2 style=\"color: #2563eb;\">Hola {{$json.name}},</h2>\n        \n        <p>Tienes <strong>{{$json.documentCount}} documento(s)</strong> pendiente(s) de revisión en la plataforma Academic Writing Reviewer.</p>\n        \n        <div style=\"background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;\">\n            <h3 style=\"margin-top: 0; color: #1e40af;\">Documentos pendientes:</h3>\n            <ul>\n                {{#each pendingDocuments}}\n                <li>{{this.title}} - Subido el {{this.uploadDate}}</li>\n                {{/each}}\n            </ul>\n        </div>\n        \n        <p>Te recomendamos revisar estos documentos para obtener retroalimentación valiosa sobre tu escritura académica.</p>\n        \n        <div style=\"text-align: center; margin: 30px 0;\">\n            <a href=\"{{$env.FRONTEND_URL}}/documents\" style=\"background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;\">Ver Mis Documentos</a>\n        </div>\n        \n        <p style=\"font-size: 14px; color: #6b7280;\">Si no deseas recibir estos recordatorios, puedes desactivarlos en tu configuración de cuenta.</p>\n        \n        <hr style=\"border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;\">\n        <p style=\"font-size: 12px; color: #9ca3af; text-align: center;\">Academic Writing Reviewer - Plataforma de Análisis de Escritura Académica</p>\n    </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "send-reminder-email",
+      "name": "Send Reminder Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.API_BASE_URL}}/notifications/create",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.API_TOKEN}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "userId",
+              "value": "={{$json.userId}}"
+            },
+            {
+              "name": "type",
+              "value": "reminder"
+            },
+            {
+              "name": "title",
+              "value": "Documentos pendientes de revisión"
+            },
+            {
+              "name": "message",
+              "value": "Tienes {{$json.documentCount}} documento(s) pendiente(s) de revisión"
+            },
+            {
+              "name": "priority",
+              "value": "medium"
+            }
+          ]
+        }
+      },
+      "id": "create-in-app-notification",
+      "name": "Create In-App Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1340, 200]
+    }
+  ],
+  "connections": {
+    "Daily Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Pending Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending Reviews": {
+      "main": [
+        [
+          {
+            "node": "Process Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Users": {
+      "main": [
+        [
+          {
+            "node": "Check Pending Documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Pending Documents": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reminder Email": {
+      "main": [
+        [
+          {
+            "node": "Create In-App Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "user-notifications-workflow",
+  "tags": []
+}
