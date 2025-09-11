@@ -123,33 +123,61 @@ cd frontend && npm run cypress:run
 ## 📊 Estructura del Proyecto
 
 \`\`\`
+
 academic-writing-reviewer/
+
 ├── backend/                 # API Node.js + Express
+
 │   ├── controllers/         # Controladores de rutas
+
 │   ├── models/             # Modelos de MongoDB
+
 │   ├── routes/             # Definición de rutas
+
 │   ├── middleware/         # Middleware personalizado
+
 │   ├── services/           # Lógica de negocio
+
 │   ├── utils/              # Utilidades
+
 │   ├── tests/              # Pruebas unitarias
+
 │   └── uploads/            # Archivos subidos
+
 ├── frontend/               # Aplicación React
+
 │   ├── src/
+
 │   │   ├── components/     # Componentes reutilizables
+
 │   │   ├── pages/          # Páginas de la aplicación
+
 │   │   ├── store/          # Configuración Redux
+
 │   │   ├── services/       # Servicios API
+
 │   │   ├── hooks/          # Custom hooks
+
 │   │   └── utils/          # Utilidades
+
 │   ├── public/             # Archivos estáticos
+
 │   └── cypress/            # Pruebas E2E
+
 ├── n8n/                    # Flujos de automatización
+
 │   └── workflows/          # Definiciones de workflows
+
 ├── docs/                   # Documentación
+
 │   ├── architecture/       # Diagramas de arquitectura
+
 │   ├── api/               # Documentación API
+
 │   └── user-guide/        # Guía de usuario
+
 └── docker-compose.yml     # Configuración Docker
+
 \`\`\`
 
 ## 🔧 Configuración de IA
@@ -244,13 +272,6 @@ El uso de Docker y la arquitectura optimizada reduce aproximadamente un 30% el c
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
-
-## 📞 Soporte
-
-Para soporte técnico o preguntas:
-- Crear issue en GitHub
-- Email: soporte@academicwriting.com
-- Documentación: `/docs`
 
 ---
 
