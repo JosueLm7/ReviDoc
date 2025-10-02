@@ -104,7 +104,7 @@ function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-6">
-                ¿Por qué elegir Academic Writer?
+                ¿Por qué elegir ReviDoc?
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
                 Nuestra plataforma combina tecnología de vanguardia con metodologías pedagógicas probadas para ofrecer

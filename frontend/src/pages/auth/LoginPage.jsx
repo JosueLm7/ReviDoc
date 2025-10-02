@@ -70,7 +70,7 @@ function LoginPage() {
         <div className="text-center">
           <BookOpenIcon className="mx-auto h-12 w-12 text-primary" />
           <h2 className="mt-6 text-3xl font-serif font-bold text-foreground">Iniciar Sesión</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Accede a tu cuenta de Academic Writer</p>
+          <p className="mt-2 text-sm text-muted-foreground">Accede a tu cuenta de ReviDoc</p>
         </div>
 
         {/* Form */}

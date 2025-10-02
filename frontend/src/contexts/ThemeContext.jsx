@@ -5,21 +5,31 @@ import { createContext, useContext, useState, useEffect } from "react"
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem("theme")
-    return savedTheme || "light"
-  })
+  const [theme, setTheme] = useState("light") // valor inicial seguro
 
+  // Al montar el componente, cargamos el theme desde localStorage
   useEffect(() => {
-    const root = window.document.documentElement
-
-    if (theme === "dark") {
-      root.classList.add("dark")
-    } else {
-      root.classList.remove("dark")
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme")
+      if (savedTheme) {
+        setTheme(savedTheme)
+      }
     }
+  }, [])
 
-    localStorage.setItem("theme", theme)
+  // Aplicar el tema y guardarlo en localStorage cuando cambie
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const root = window.document.documentElement
+
+      if (theme === "dark") {
+        root.classList.add("dark")
+      } else {
+        root.classList.remove("dark")
+      }
+
+      localStorage.setItem("theme", theme)
+    }
   }, [theme])
 
   const toggleTheme = () => {

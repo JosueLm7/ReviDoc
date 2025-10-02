@@ -14,7 +14,7 @@ function PublicHeader() {
           <Link to="/" className="flex items-center space-x-3">
             <BookOpenIcon className="w-8 h-8 text-primary" />
             <div>
-              <h1 className="text-xl font-serif font-bold text-foreground">Academic Writer</h1>
+              <h1 className="text-xl font-serif font-bold text-foreground">ReviDoc</h1>
               <p className="text-xs text-muted-foreground">Revisión Inteligente con IA</p>
             </div>
           </Link>

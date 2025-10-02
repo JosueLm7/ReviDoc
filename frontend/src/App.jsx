@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+"use client"
+
+import dynamic from "next/dynamic"
 import { Provider } from "react-redux"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -30,6 +32,13 @@ import AdminDashboard from "./pages/admin/AdminDashboard"
 import UsersManagement from "./pages/admin/UsersManagement"
 import StatisticsPage from "./pages/admin/StatisticsPage"
 import NotFoundPage from "./pages/NotFoundPage"
+
+// ⛔ Importa BrowserRouter dinámicamente para que se ejecute solo en cliente
+const Router = dynamic(
+  () => import("react-router-dom").then(mod => mod.BrowserRouter),
+  { ssr: false }
+)
+import { Routes, Route, Navigate } from "react-router-dom"
 
 function App() {
   return (

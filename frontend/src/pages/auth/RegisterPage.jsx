@@ -90,7 +90,7 @@ function RegisterPage() {
         <div className="text-center">
           <BookOpenIcon className="mx-auto h-12 w-12 text-primary" />
           <h2 className="mt-6 text-3xl font-serif font-bold text-foreground">Crear Cuenta</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Únete a Academic Writer y mejora tu escritura</p>
+          <p className="mt-2 text-sm text-muted-foreground">Únete a ReviDoc y mejora tu escritura</p>
         </div>
 
         {/* Form */}
