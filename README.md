@@ -1,4 +1,4 @@
-# 📚 Academic Writing Reviewer
+# 📚 ReviDocUC
 
 **Plataforma colaborativa de revisión automática de escritura académica con Inteligencia Artificial y flujos automatizados.**  
 
@@ -66,8 +66,8 @@
 
 ### 1️⃣ Clonar el Repositorio
 ```bash
-git clone https://github.com/tu-usuario/academic-writing-reviewer.git
-cd academic-writing-reviewer
+git clone https://github.com/tu-usuario/ReviDoc.git
+cd ReviDoc
 ```
 
 ### 2️⃣ Configurar Variables de Entorno
@@ -141,7 +141,7 @@ cd frontend && npm run cypress:run
 ## 📊 Estructura del Proyecto
 
 ```bash
-academic-writing-reviewer/
+ReviDocUC/
 ├── backend/                 # API Node.js + Express
 │   ├── controllers/         # Controladores de rutas
 │   ├── models/              # Modelos de MongoDB
