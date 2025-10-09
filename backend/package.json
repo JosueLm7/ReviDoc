@@ -1,5 +1,5 @@
 {
-  "name": "academic-writing-backend",
+  "name": "ReviDocUC - Backend",
   "version": "1.0.0",
   "description": "Backend API para revisor automático de escritura académica",
   "main": "server.js",

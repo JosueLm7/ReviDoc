@@ -24,7 +24,7 @@ router.post("/register", validateUserRegistration, async (req, res) => {
 
     // Create new user
     const user = new User({
-      name,
+      name, 
       email,
       password,
       role: role || "student",
@@ -46,10 +46,8 @@ router.post("/register", validateUserRegistration, async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Usuario registrado exitosamente",
-      data: {
-        user: userResponse,
-        token,
-      },
+      user: userResponse,
+      token,
     })
   } catch (error) {
     logger.error("Error en registro:", error)
@@ -101,10 +99,8 @@ router.post("/login", validateUserLogin, async (req, res) => {
     res.json({
       success: true,
       message: "Login exitoso",
-      data: {
-        user: userResponse,
-        token,
-      },
+      user: userResponse,
+      token,
     })
   } catch (error) {
     logger.error("Error en login:", error)

@@ -11,14 +11,34 @@ export const fetchDocuments = createAsyncThunk("documents/fetchDocuments", async
   }
 })
 
-export const uploadDocument = createAsyncThunk("documents/uploadDocument", async (formData, { rejectWithValue }) => {
-  try {
-    const response = await documentsAPI.uploadDocument(formData)
-    return response.data
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Error uploading document")
+export const uploadDocument = createAsyncThunk(
+  "documents/uploadDocument", 
+  async (formData, { rejectWithValue }) => {
+    try {
+      console.log("🔵 Iniciando upload en thunk...")
+      const response = await documentsAPI.uploadDocument(formData)
+      console.log("✅ Upload exitoso en thunk:", response.data)
+      return response.data
+    } catch (error) {
+      console.error("❌ Error completo en uploadDocument thunk:", error)
+      
+      let errorMessage = "Error desconocido al subir el documento"
+      
+      if (error.response) {
+        errorMessage = error.response.data?.message || 
+                      error.response.data?.error ||
+                      `Error ${error.response.status}: ${error.response.statusText}`
+      } else if (error.request) {
+        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión."
+      } else {
+        errorMessage = error.message || "Error de configuración"
+      }
+      
+      console.error("📝 Mensaje de error final:", errorMessage)
+      return rejectWithValue(errorMessage)
+    }
   }
-})
+)
 
 export const fetchDocumentById = createAsyncThunk("documents/fetchDocumentById", async (id, { rejectWithValue }) => {
   try {
@@ -91,8 +111,10 @@ const documentsSlice = createSlice({
       })
       .addCase(fetchDocuments.fulfilled, (state, action) => {
         state.isLoading = false
-        state.documents = action.payload.documents
-        state.pagination = action.payload.pagination
+        state.error = null
+        // ✅ IMPORTANTE: La estructura real de tu backend
+        state.documents = action.payload.data?.documents || []
+        state.pagination = action.payload.data?.pagination || initialState.pagination
       })
       .addCase(fetchDocuments.rejected, (state, action) => {
         state.isLoading = false
@@ -106,7 +128,9 @@ const documentsSlice = createSlice({
       })
       .addCase(uploadDocument.fulfilled, (state, action) => {
         state.isLoading = false
-        state.documents.unshift(action.payload.document)
+        if (action.payload.document) {
+          state.documents.unshift(action.payload.document)
+        }
       })
       .addCase(uploadDocument.rejected, (state, action) => {
         state.isLoading = false
@@ -120,7 +144,8 @@ const documentsSlice = createSlice({
       })
       .addCase(fetchDocumentById.fulfilled, (state, action) => {
         state.isLoading = false
-        state.currentDocument = action.payload.document
+        // El backend envía { data: { document } } no { document }
+        state.currentDocument = action.payload.data?.document || action.payload
       })
       .addCase(fetchDocumentById.rejected, (state, action) => {
         state.isLoading = false
@@ -129,12 +154,13 @@ const documentsSlice = createSlice({
 
       // Update document
       .addCase(updateDocument.fulfilled, (state, action) => {
-        const index = state.documents.findIndex((doc) => doc._id === action.payload.document._id)
+        const updatedDoc = action.payload.document
+        const index = state.documents.findIndex((doc) => doc._id === updatedDoc._id)
         if (index !== -1) {
-          state.documents[index] = action.payload.document
+          state.documents[index] = updatedDoc
         }
-        if (state.currentDocument?._id === action.payload.document._id) {
-          state.currentDocument = action.payload.document
+        if (state.currentDocument?._id === updatedDoc._id) {
+          state.currentDocument = updatedDoc
         }
       })
 

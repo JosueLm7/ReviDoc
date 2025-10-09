@@ -20,8 +20,14 @@ function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState({})
 
-  const { register, isLoading } = useAuth()
+  const { register, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/app/dashboard", { replace: true })
+    }
+  }, [isAuthenticated, isLoading, navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target

@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit"
+import authReducer from './slices/authSlice'
 import documentsReducer from "./slices/documentsSlice"
 import reviewsReducer from "./slices/reviewsSlice"
 import statisticsReducer from "./slices/statisticsSlice"
@@ -7,6 +8,7 @@ import { ReturnType } from "react"
 
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
     documents: documentsReducer,
     reviews: reviewsReducer,
     statistics: statisticsReducer,
@@ -20,3 +22,4 @@ export const store = configureStore({
     }),
 })
 
+export default store

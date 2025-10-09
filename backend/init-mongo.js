@@ -1,5 +1,5 @@
 // MongoDB initialization script for Docker
-const db = db.getSiblingDB("academic_writing")
+const db = db.getSiblingDB("ReviDocUC")
 
 // Create collections
 db.createCollection("users")
@@ -19,8 +19,8 @@ db.reviews.createIndex({ createdAt: -1 })
 // Insert default admin user
 db.users.insertOne({
   name: "Administrador",
-  email: "admin@academic.com",
-  password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
+  email: "admin@revidoc.com",
+  password: "josuelm123", // password
   role: "admin",
   isActive: true,
   createdAt: new Date(),

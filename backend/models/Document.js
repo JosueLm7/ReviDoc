@@ -34,6 +34,10 @@ const documentSchema = new mongoose.Schema(
       required: true,
       enum: ["pdf", "doc", "docx", "txt"],
     },
+    fileUrl: {
+      type: String,
+      required: false
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

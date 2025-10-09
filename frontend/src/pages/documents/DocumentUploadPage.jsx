@@ -43,15 +43,45 @@ function DocumentUploadPage() {
   }
 
   const handleFiles = (newFiles) => {
+    console.log("📁 Archivos recibidos para validación:", newFiles)
+    
     const validFiles = newFiles.filter((file) => {
-      const validTypes = [
+      // Obtener extensión del archivo
+      const fileExtension = file.name.toLowerCase().split('.').pop()
+      
+      // Tipos MIME válidos
+      const validMimeTypes = [
         "text/plain",
         "application/pdf",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/octet-stream"
       ]
-      return validTypes.includes(file.type) && file.size <= 10 * 1024 * 1024 // 10MB limit
+      
+      // Extensiones válidas
+      const validExtensions = ['txt', 'pdf', 'doc', 'docx']
+      
+      // Validar por tipo MIME O por extensión
+      const isValidMimeType = validMimeTypes.includes(file.type) || file.type === ""
+      const isValidExtension = validExtensions.includes(fileExtension)
+      const isValidSize = file.size <= 10 * 1024 * 1024
+      
+      console.log(`📋 Validación ${file.name}:`, {
+        tipo: file.type,
+        extension: fileExtension,
+        tamaño: file.size,
+        mimeValido: isValidMimeType,
+        extensionValida: isValidExtension,
+        tamañoValido: isValidSize
+      })
+
+      return (isValidMimeType || isValidExtension) && isValidSize
     })
+
+    if (validFiles.length !== newFiles.length) {
+      const rejectedCount = newFiles.length - validFiles.length
+      alert(`${rejectedCount} archivo(s) fueron rechazados. Formatos soportados: TXT, PDF, DOC, DOCX (máx. 10MB)`)
+    }
 
     setFiles((prev) => [...prev, ...validFiles])
   }
@@ -61,47 +91,95 @@ function DocumentUploadPage() {
   }
 
   const handleUpload = async () => {
-    if (files.length === 0) return
+  if (files.length === 0) return;
 
-    setUploading(true)
-    const newProgress = {}
+  setUploading(true);
+  const newProgress = {};
 
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        newProgress[i] = 0
-        setUploadProgress({ ...newProgress })
+  try {
+    const uploadResults = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      console.log(`📤 Iniciando upload ${i + 1}/${files.length}:`, file.name);
+      
+      newProgress[i] = 0;
+      setUploadProgress({ ...newProgress });
 
-        const formData = new FormData()
-        formData.append("file", file)
+      const formData = new FormData();
+      // ⚠️ CAMBIO IMPORTANTE: Usar "document" en lugar de "file"
+      formData.append("document", file); // ← Esto es lo que tu backend espera
+      formData.append("title", file.name); // Agrega título automáticamente
+      formData.append("description", `Documento subido: ${file.name}`);
 
-        // Simulate upload progress
-        const progressInterval = setInterval(() => {
-          newProgress[i] = Math.min(newProgress[i] + 10, 90)
-          setUploadProgress({ ...newProgress })
-        }, 200)
-
-        try {
-          await dispatch(uploadDocument(formData)).unwrap()
-          clearInterval(progressInterval)
-          newProgress[i] = 100
-          setUploadProgress({ ...newProgress })
-        } catch (error) {
-          clearInterval(progressInterval)
-          console.error("Error uploading file:", error)
+      console.log("📦 FormData contenido:");
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`   ${key}:`, value.name, value.type, value.size);
+        } else {
+          console.log(`   ${key}: ${value}`);
         }
       }
 
-      // Redirect to documents page after successful upload
-      setTimeout(() => {
-        navigate("/documents")
-      }, 1000)
-    } catch (error) {
-      console.error("Upload error:", error)
-    } finally {
-      setUploading(false)
+      // Simular progreso
+      const progressInterval = setInterval(() => {
+        newProgress[i] = Math.min(newProgress[i] + 10, 90);
+        setUploadProgress({ ...newProgress });
+      }, 200);
+
+      try {
+        console.log("🔄 Enviando archivo al servidor...");
+        const result = await dispatch(uploadDocument(formData)).unwrap();
+        console.log("✅ Archivo subido exitosamente:", result);
+        
+        uploadResults.push({ success: true, file: file.name, result });
+        clearInterval(progressInterval);
+        newProgress[i] = 100;
+        setUploadProgress({ ...newProgress });
+        
+      } catch (error) {
+        clearInterval(progressInterval);
+        console.error(`❌ Error subiendo "${file.name}":`, error);
+        
+        const errorMessage = error || 'Error desconocido';
+        uploadResults.push({ 
+          success: false, 
+          file: file.name, 
+          error: errorMessage 
+        });
+        
+        alert(`❌ Error subiendo "${file.name}":\n${errorMessage}`);
+      }
     }
+
+    // Resumen final
+    const successfulUploads = uploadResults.filter(r => r.success).length;
+    const failedUploads = uploadResults.filter(r => !r.success);
+    
+    console.log("📊 Resumen final:", {
+      exitosos: successfulUploads,
+      fallidos: failedUploads.length
+    });
+
+    if (successfulUploads > 0) {
+      if (failedUploads.length > 0) {
+        const failedNames = failedUploads.map(f => f.file).join(', ');
+        alert(`✅ ${successfulUploads} archivo(s) subidos\n❌ Fallaron: ${failedNames}`);
+      } else {
+        alert(`✅ Todos los archivos subidos exitosamente`);
+      }
+      
+      setTimeout(() => {
+        navigate("/app/documents");
+      }, 1500);
+    }
+
+  } catch (error) {
+    console.error("💥 Error general:", error);
+  } finally {
+    setUploading(false);
   }
+};
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return "0 Bytes"
@@ -124,7 +202,7 @@ function DocumentUploadPage() {
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-4">
             <button
-              onClick={() => navigate("/documents")}
+              onClick={() => navigate("/app/documents")}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               ← Volver a Documentos
@@ -184,7 +262,9 @@ function DocumentUploadPage() {
                       <span className="text-2xl">{getFileIcon(file.type)}</span>
                       <div>
                         <p className="font-medium text-foreground">{file.name}</p>
-                        <p className="text-sm text-muted-foreground">{formatFileSize(file.size)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatFileSize(file.size)} • {file.type || 'Tipo no detectado'}
+                        </p>
                       </div>
                     </div>
 

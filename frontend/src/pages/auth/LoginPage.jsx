@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../contexts/AuthContext"
 import { BookOpenIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -14,11 +15,17 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
 
-  const { login, isLoading } = useAuth()
+  const { login, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
   const from = location.state?.from?.pathname || "/app/dashboard"
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate("/app/dashboard", { replace: true })
+    }
+  }, [isAuthenticated, isLoading, navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target

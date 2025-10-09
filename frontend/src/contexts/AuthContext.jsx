@@ -3,12 +3,13 @@
 import { createContext, useContext, useReducer, useEffect } from "react"
 import { authAPI } from "../services/api"
 import { toast } from "react-toastify"
+import axios from "axios"
 
 const AuthContext = createContext()
 
 const initialState = {
   user: null,
-  token: null, // ✅ No usamos localStorage aquí
+  token: null,
   isAuthenticated: false,
   isLoading: true,
   error: null,
@@ -43,25 +44,74 @@ function authReducer(state, action) {
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState)
 
-  // ✅ Verificamos si hay token solo en cliente
+  // ✅ **Verificación de autenticación mejorada**
   useEffect(() => {
     const checkAuth = async () => {
-      if (typeof window === "undefined") return
+      // Solo ejecutar en cliente
+      if (typeof window === "undefined") {
+        dispatch({ type: "AUTH_FAILURE", payload: null })
+        return
+      }
 
-      const token = localStorage.getItem("token")
+      try {
+        const token = localStorage.getItem("token")
+        const storedUser = localStorage.getItem("user")
 
-      if (token) {
+        // Si no hay token, limpiar todo
+        if (!token) {
+          localStorage.removeItem("user")
+          dispatch({ type: "AUTH_FAILURE", payload: null })
+          return
+        }
+
+        // ✅ **Validación robusta del usuario almacenado**
+        if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
+          try {
+            const parsedUser = JSON.parse(storedUser)
+            
+            // Validar que el usuario tenga la estructura esperada
+            if (parsedUser && typeof parsedUser === 'object' && parsedUser.id) {
+              dispatch({
+                type: "AUTH_SUCCESS",
+                payload: { user: parsedUser, token },
+              })
+              return
+            }
+          } catch (parseError) {
+            console.error("Error parsing stored user:", parseError)
+            // Continuar para obtener usuario desde el backend
+          }
+        }
+
+        // ✅ **Obtener usuario desde el backend si el token es válido**
         try {
           const response = await authAPI.getCurrentUser()
-          dispatch({
-            type: "AUTH_SUCCESS",
-            payload: { user: response.data.user, token },
-          })
+          const userData = response.data.user || response.data.data?.user
+          
+          if (userData) {
+            localStorage.setItem("user", JSON.stringify(userData))
+            dispatch({
+              type: "AUTH_SUCCESS",
+              payload: { user: userData, token },
+            })
+          } else {
+            throw new Error("Datos de usuario no válidos")
+          }
         } catch (error) {
+          console.error("Error fetching user data:", error)
+          // Limpiar datos inválidos
           localStorage.removeItem("token")
-          dispatch({ type: "AUTH_FAILURE", payload: "Sesión expirada" })
+          localStorage.removeItem("user")
+          dispatch({ 
+            type: "AUTH_FAILURE", 
+            payload: "Sesión expirada o inválida" 
+          })
         }
-      } else {
+
+      } catch (error) {
+        console.error("Error in auth check:", error)
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
         dispatch({ type: "AUTH_FAILURE", payload: null })
       }
     }
@@ -73,8 +123,12 @@ export function AuthProvider({ children }) {
     try {
       dispatch({ type: "AUTH_START" })
       const response = await authAPI.login(credentials)
-      const { user, token } = response.data
+
+      const { user, token } = response.data.data
+
+      // ✅ **Guardar de forma segura**
       localStorage.setItem("token", token)
+      localStorage.setItem("user", JSON.stringify(user))
 
       dispatch({ type: "AUTH_SUCCESS", payload: { user, token } })
       toast.success(`¡Bienvenido, ${user.name}!`)
@@ -91,8 +145,11 @@ export function AuthProvider({ children }) {
     try {
       dispatch({ type: "AUTH_START" })
       const response = await authAPI.register(userData)
-      const { user, token } = response.data
+      const { user, token } = response.data.data
+      
+      // ✅ **Guardar de forma segura**
       localStorage.setItem("token", token)
+      localStorage.setItem("user", JSON.stringify(user))
 
       dispatch({ type: "AUTH_SUCCESS", payload: { user, token } })
       toast.success("¡Cuenta creada exitosamente!")
@@ -111,13 +168,21 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error("Error during logout:", error)
     } finally {
+      // ✅ **Limpiar consistentemente**
       localStorage.removeItem("token")
+      localStorage.removeItem("user")
       dispatch({ type: "LOGOUT" })
       toast.info("Sesión cerrada")
     }
   }
 
-  const updateUser = (userData) => dispatch({ type: "UPDATE_USER", payload: userData })
+  const updateUser = (userData) => {
+    // ✅ **Actualizar state y localStorage de forma atómica**
+    const updatedUser = { ...state.user, ...userData }
+    dispatch({ type: "UPDATE_USER", payload: userData })
+    localStorage.setItem("user", JSON.stringify(updatedUser))
+  }
+
   const clearError = () => dispatch({ type: "CLEAR_ERROR" })
 
   const value = { ...state, login, register, logout, updateUser, clearError }

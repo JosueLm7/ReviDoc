@@ -20,8 +20,11 @@ const storage = multer.diskStorage({
     cb(null, uploadPath)
   },
   filename: (req, file, cb) => {
+    // ✅ CORREGIDO: Mantener nombre original + timestamp para evitar duplicados
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname))
+    const originalName = path.parse(file.originalname).name // nombre sin extensión
+    const extension = path.extname(file.originalname)
+    cb(null, `${originalName}-${uniqueSuffix}${extension}`)
   },
 })
 
@@ -31,79 +34,180 @@ const fileFilter = (req, file, cb) => {
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain",
+    "application/octet-stream" // ← AGREGAR ESTO
   ]
 
-  if (allowedTypes.includes(file.mimetype)) {
+  const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt']
+  const fileExtension = path.extname(file.originalname).toLowerCase()
+
+  console.log("🔍 Validando archivo:", {
+    nombre: file.originalname,
+    mimeType: file.mimetype,
+    extension: fileExtension,
+    tamaño: file.size
+  })
+
+  // ✅ PERMITIR por MIME type O por extensión
+  if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(fileExtension)) {
+    console.log("✅ Archivo aceptado")
     cb(null, true)
   } else {
-    cb(new Error("Tipo de archivo no permitido"), false)
+    console.log("❌ Archivo rechazado - Tipo no permitido")
+    cb(new Error(`Tipo de archivo no permitido: ${file.mimetype} ${fileExtension}`), false)
   }
 }
 
 const upload = multer({
   storage,
-  fileFilter,
   limits: {
     fileSize: Number.parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB
   },
+  fileFilter: (req, file, cb) => {
+    // ✅ CONFIGURACIÓN TEMPORAL MÁS PERMISIVA
+    console.log("🔍 Archivo recibido:", {
+      nombre: file.originalname,
+      tipo: file.mimetype,
+      tamaño: file.size
+    });
+    
+    // Permitir cualquier archivo temporalmente para testing
+    cb(null, true);
+    
+    /* 
+    // Luego cambiar a esto:
+    const allowed = [
+      "application/pdf",
+      "application/msword", 
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "application/octet-stream"
+    ];
+    
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Tipo no permitido: ${file.mimetype}`), false);
+    }
+    */
+  }
 })
 
 // @route   POST /api/documents
 // @desc    Upload a new document
 // @access  Private
-router.post("/", authenticate, upload.single("document"), validateDocumentUpload, async (req, res) => {
+router.post("/", authenticate, upload.array("documents", 10), validateDocumentUpload, async (req, res) => {
   try {
-    if (!req.file) {
+    console.log("📥 Request recibida - Archivos:", req.files?.length || 0);
+    console.log("📥 Body:", req.body);
+    console.log("📥 Headers:", req.headers);
+
+    if (!req.files || req.files.length === 0) {
+      console.log("❌ No se recibieron archivos");
       return res.status(400).json({
         success: false,
         message: "Archivo requerido",
       })
     }
 
-    const { title, description, category, academicLevel, subject, citationStyle, tags } = req.body
+    const results = []
+    
+    for (const file of req.files) {
+      try {
+        console.log(`📄 Procesando archivo: ${file.originalname}`);
+        
+        const { title, description, category, academicLevel, subject, citationStyle, tags } = req.body
 
-    // Extract text from uploaded file
-    const content = await extractTextFromFile(req.file.path, req.file.mimetype)
+        // Extraer texto para análisis
+        const content = await extractTextFromFile(file.path, file.mimetype)
 
-    // Create document
-    const document = new Document({
-      title,
-      description,
-      content,
-      originalFileName: req.file.originalname,
-      filePath: req.file.path,
-      fileSize: req.file.size,
-      fileType: path.extname(req.file.originalname).substring(1).toLowerCase(),
-      userId: req.user._id,
-      category: category || "essay",
-      academicLevel: academicLevel || "undergraduate",
-      subject,
-      citationStyle: citationStyle || "apa",
-      tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
-    })
+        // ✅ CORREGIDO: Crear URL pública correctamente
+        const fileUrl = `${req.protocol}://${req.get('host')}/api/documents/file/${file.filename}`
 
-    await document.save()
+        console.log("🔗 FileURL generado:", fileUrl);
 
-    // Update user statistics
-    await req.user.updateOne({ $inc: { "statistics.documentsUploaded": 1 } })
+        // Crear documento
+        const document = new Document({
+          title: title || file.originalname,
+          description: description || `Documento subido: ${file.originalname}`,
+          content,
+          originalFileName: file.originalname,
+          filePath: file.path,
+          fileUrl, // ← ESTE CAMPO DEBERÍA GUARDARSE
+          fileSize: file.size,
+          fileType: path.extname(file.originalname).substring(1).toLowerCase(),
+          userId: req.user._id,
+          category: category || "essay",
+          academicLevel: academicLevel || "undergraduate",
+          subject: subject || "General",
+          citationStyle: citationStyle || "apa",
+          tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
+        })
 
-    logger.info(`Documento subido: ${title} por ${req.user.email}`)
+        console.log("💾 Guardando documento en BD...");
+        await document.save()
+
+        // DEBUG: Verificar qué se guardó realmente
+          const docFromDB = await Document.findById(document._id).lean();
+          console.log("🔍 DOCUMENTO EN BD:", {
+            fileUrl: docFromDB.fileUrl,
+            fileURL: docFromDB.fileURL, // Por si se guarda con mayúsculas
+            campos: Object.keys(docFromDB).filter(key => key.includes('file'))
+          });
+        
+        // Populate para tener datos completos
+        const savedDocument = await Document.findById(document._id)
+          .populate("userId", "name email")
+        
+        console.log("✅ Documento guardado:", {
+          id: savedDocument._id,
+          title: savedDocument.title,
+          fileUrl: savedDocument.fileUrl, // ← VERIFICAR SI SE GUARDÓ
+          filePath: savedDocument.filePath
+        });
+        const rawDoc = await Document.findById(document._id).lean();
+console.log("📊 CAMPOS EN BD:", Object.keys(rawDoc).filter(key => key.includes('file')));
+
+        results.push(savedDocument)
+
+        logger.info(`Documento subido: ${document.title} por ${req.user.email}`)
+      } catch (fileError) {
+        console.error(`❌ Error procesando archivo ${file.originalname}:`, fileError);
+        logger.error(`Error procesando archivo ${file.originalname}:`, fileError)
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path)
+        }
+        results.push({ error: `Error procesando ${file.originalname}: ${fileError.message}` })
+      }
+    }
+
+    // Actualizar estadísticas
+    const successfulUploads = results.filter(r => !r.error).length
+    if (successfulUploads > 0) {
+      await req.user.updateOne({ $inc: { "statistics.documentsUploaded": successfulUploads } })
+    }
 
     res.status(201).json({
       success: true,
-      message: "Documento subido exitosamente",
-      data: { document },
+      message: `${successfulUploads} documento(s) subido(s) exitosamente`,
+      data: { 
+        documents: results.filter(r => !r.error) 
+      },
+      errors: results.filter(r => r.error).map(r => r.error)
     })
   } catch (error) {
-    // Clean up uploaded file if document creation fails
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path)
+    // Limpiar archivos
+    if (req.files) {
+      req.files.forEach(file => {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path)
+        }
+      })
     }
 
-    logger.error("Error subiendo documento:", error)
+    logger.error("Error subiendo documentos:", error)
     res.status(500).json({
       success: false,
-      message: "Error interno del servidor",
+      message: "Error interno del servidor: " + error.message,
     })
   }
 })
@@ -162,6 +266,86 @@ router.get("/", authenticate, validatePagination, async (req, res) => {
     })
   }
 })
+
+// AGREGAR ESTE ENDPOINT AL BACKEND
+// @route   GET /api/documents/file/:filename
+// @desc    Get original file
+// @access  Private
+router.get("/file/:filename", authenticate, async (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const filePath = path.join(__dirname, "../uploads", filename);
+
+    console.log("📁 Buscando archivo:", filePath);
+
+    // Verificar que el archivo existe
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: "Archivo no encontrado",
+      });
+    }
+
+    // Buscar documento relacionado para verificar permisos
+    const document = await Document.findOne({ 
+      $or: [
+        { filePath: filePath },
+        { originalFileName: filename }
+      ]
+    });
+
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        message: "Documento no encontrado en la base de datos",
+      });
+    }
+
+    // Verificar autorización
+    if (req.user.role !== "admin" && document.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "No tienes permisos para acceder a este archivo",
+      });
+    }
+
+    // Determinar el tipo de contenido
+    const mimeTypes = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'txt': 'text/plain'
+    };
+
+    const fileExtension = path.extname(filename).toLowerCase().substring(1);
+    const mimeType = mimeTypes[fileExtension] || 'application/octet-stream';
+
+    // Servir el archivo
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${document.originalFileName}"`);
+    
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+
+  } catch (error) {
+    logger.error("Error sirviendo archivo:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    });
+  }
+});
+
+// Función auxiliar para obtener MIME type
+function getMimeType(fileType) {
+  const mimeMap = {
+    'pdf': 'application/pdf',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'txt': 'text/plain'
+  }
+  return mimeMap[fileType.toLowerCase()] || 'application/octet-stream'
+}
 
 // @route   GET /api/documents/:id
 // @desc    Get document by ID

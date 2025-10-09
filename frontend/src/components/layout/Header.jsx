@@ -17,7 +17,7 @@ function Header() {
         <Link to="/app/dashboard" className="flex items-center space-x-3">
           <BookOpenIcon className="w-8 h-8 text-primary" />
           <div>
-            <h1 className="text-xl font-serif font-bold text-foreground">Academic Writer</h1>
+            <h1 className="text-xl font-serif font-bold text-foreground">ReviDocUC</h1>
             <p className="text-xs text-muted-foreground">Revisión Inteligente</p>
           </div>
         </Link>

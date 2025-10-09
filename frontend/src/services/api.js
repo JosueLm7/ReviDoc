@@ -1,15 +1,12 @@
 import axios from "axios"
 import { toast } from "react-toastify"
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 30000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  timeout: 60000,
 })
 
 // Request interceptor to add auth token
@@ -19,17 +16,43 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    
+    // No establecer Content-Type para FormData, axios lo hace automáticamente
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json"
+    }
+    
+    console.log("🔵 Configuración de request:", {
+      url: config.url,
+      method: config.method,
+      hasFormData: config.data instanceof FormData
+    })
+    
     return config
   },
   (error) => {
+    console.error("❌ Error en request interceptor:", error)
     return Promise.reject(error)
   },
 )
 
 // Response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("✅ Response exitoso:", {
+      url: response.config.url,
+      status: response.status
+    })
+    return response
+  },
   (error) => {
+    console.error("❌ Error en response interceptor:", {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message,
+      responseData: error.response?.data
+    })
+    
     if (error.response?.status === 401) {
       localStorage.removeItem("token")
       window.location.href = "/login"
@@ -60,19 +83,35 @@ export const usersAPI = {
   getUserStatistics: (id) => api.get(`/users/${id}/statistics`),
 }
 
-// Documents API
+// Documents API - Corregido para upload
 export const documentsAPI = {
   getDocuments: (params) => api.get("/documents", { params }),
   getDocumentById: (id) => api.get(`/documents/${id}`),
   uploadDocument: (formData) => {
+    console.log("📤 Subiendo documento a endpoint: /documents")
+    
+    // Verificar contenido del FormData
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(`   ${key}:`, value.name, value.type, value.size)
+      }
+    }
+    
     return api.post("/documents", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      timeout: 120000,
     })
   },
   updateDocument: (id, data) => api.put(`/documents/${id}`, data),
   deleteDocument: (id) => api.delete(`/documents/${id}`),
+}
+
+export const getDocumentFile = (filename) => {
+  return axios.get(`${API_URL}/documents/file/${filename}`, {
+    responseType: 'blob',
+    headers: {
+      'Authorization': `Bearer ${getToken()}`
+    }
+  })
 }
 
 // Reviews API
