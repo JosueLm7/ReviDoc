@@ -120,26 +120,55 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = async (credentials) => {
-    try {
-      dispatch({ type: "AUTH_START" })
-      const response = await authAPI.login(credentials)
+  try {
+    dispatch({ type: "AUTH_START" })
+    
+    console.log("🔵 [DEBUG] Iniciando login con:", credentials)
+    
+    const response = await authAPI.login(credentials)
+    console.log("🟢 [DEBUG] Respuesta completa:", response)
+    console.log("📊 [DEBUG] Response.data:", response.data)
+    
+    // ✅ **VERIFICA LA ESTRUCTURA EXACTA**
+    // Prueba diferentes posibles estructuras
+    const user = response.data.data?.user || 
+                 response.data.user || 
+                 response.data.data ||
+                 response.data
+    
+    const token = response.data.data?.token || 
+                  response.data.token || 
+                  response.data.accessToken ||
+                  response.data.access_token
 
-      const { user, token } = response.data.data
+    console.log("👤 [DEBUG] User extraído:", user)
+    console.log("🔐 [DEBUG] Token extraído:", token)
 
-      // ✅ **Guardar de forma segura**
-      localStorage.setItem("token", token)
-      localStorage.setItem("user", JSON.stringify(user))
-
-      dispatch({ type: "AUTH_SUCCESS", payload: { user, token } })
-      toast.success(`¡Bienvenido, ${user.name}!`)
-      return { success: true }
-    } catch (error) {
-      const message = error.response?.data?.message || "Error al iniciar sesión"
-      dispatch({ type: "AUTH_FAILURE", payload: message })
-      toast.error(message)
-      return { success: false, error: message }
+    if (!user || !token) {
+      console.error("❌ [DEBUG] Faltan user o token en la respuesta")
+      throw new Error("Datos de autenticación incompletos en la respuesta")
     }
+
+    // ✅ **Guardar en localStorage**
+    localStorage.setItem("token", token)
+    localStorage.setItem("user", JSON.stringify(user))
+
+    // ✅ **Verificar que se guardó**
+    console.log("✅ [DEBUG] Token guardado:", localStorage.getItem("token"))
+    console.log("✅ [DEBUG] User guardado:", localStorage.getItem("user"))
+
+    dispatch({ type: "AUTH_SUCCESS", payload: { user, token } })
+    
+    toast.success(`¡Bienvenido, ${user.name || user.email}!`)
+    return { success: true }
+  } catch (error) {
+    console.error("❌ [DEBUG] Error completo en login:", error)
+    const message = error.response?.data?.message || error.message || "Error al iniciar sesión"
+    dispatch({ type: "AUTH_FAILURE", payload: message })
+    toast.error(message)
+    return { success: false, error: message }
   }
+}
 
   const register = async (userData) => {
     try {

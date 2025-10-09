@@ -3,6 +3,22 @@ import { toast } from "react-toastify"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
+// ✅ Función para obtener el token (solo lectura)
+export const getToken = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token")
+  }
+  return null
+}
+
+// ✅ Función para limpiar tokens (solo para interceptor)
+export const clearAuthData = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+  }
+}
+
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
@@ -12,7 +28,7 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token")
+    const token = getToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -25,6 +41,7 @@ api.interceptors.request.use(
     console.log("🔵 Configuración de request:", {
       url: config.url,
       method: config.method,
+      hasToken: !!token,
       hasFormData: config.data instanceof FormData
     })
     
@@ -41,32 +58,48 @@ api.interceptors.response.use(
   (response) => {
     console.log("✅ Response exitoso:", {
       url: response.config.url,
-      status: response.status
+      status: response.status,
+      data: response.data
     })
     return response
   },
   (error) => {
+    // ✅ Captura robusta de errores
+    const url = error.config?.url || "URL desconocida"
+    const status = error.response?.status || "Sin respuesta"
+    const message = error.response?.data?.message || error.message || "Error desconocido"
+    const responseData = error.response?.data || "Sin datos"
+
     console.error("❌ Error en response interceptor:", {
-      url: error.config?.url,
-      status: error.response?.status,
-      message: error.message,
-      responseData: error.response?.data
+      url,
+      status,
+      message,
+      responseData
     })
-    
+
+    // 🔐 Manejo seguro de errores 401
     if (error.response?.status === 401) {
-      localStorage.removeItem("token")
-      window.location.href = "/login"
+      clearAuthData()
+      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+        window.location.href = "/login"
+      }
     }
 
+    // ⚠️ Errores de servidor
     if (error.response?.status >= 500) {
       toast.error("Error interno del servidor. Por favor, intenta más tarde.")
     }
 
+    // ⚠️ Errores de red o sin respuesta
+    if (error.message === "Network Error" || !error.response) {
+      toast.error("Error de conexión con el servidor.")
+    }
+
     return Promise.reject(error)
-  },
+  }
 )
 
-// Auth API
+// Auth API - ✅ Solo hace las peticiones, NO guarda tokens
 export const authAPI = {
   login: (credentials) => api.post("/auth/login", credentials),
   register: (userData) => api.post("/auth/register", userData),
@@ -83,7 +116,7 @@ export const usersAPI = {
   getUserStatistics: (id) => api.get(`/users/${id}/statistics`),
 }
 
-// Documents API - Corregido para upload
+// Documents API
 export const documentsAPI = {
   getDocuments: (params) => api.get("/documents", { params }),
   getDocumentById: (id) => api.get(`/documents/${id}`),
@@ -105,11 +138,13 @@ export const documentsAPI = {
   deleteDocument: (id) => api.delete(`/documents/${id}`),
 }
 
+// ✅ Función para descargar archivos
 export const getDocumentFile = (filename) => {
+  const token = getToken()
   return axios.get(`${API_URL}/documents/file/${filename}`, {
     responseType: 'blob',
     headers: {
-      'Authorization': `Bearer ${getToken()}`
+      'Authorization': `Bearer ${token}`
     }
   })
 }
