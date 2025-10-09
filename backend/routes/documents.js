@@ -121,9 +121,9 @@ router.post("/", authenticate, upload.array("documents", 10), validateDocumentUp
         const content = await extractTextFromFile(file.path, file.mimetype)
 
         // ✅ CORREGIDO: Crear URL pública correctamente
-        const fileUrl = `${req.protocol}://${req.get('host')}/api/documents/file/${file.filename}`
+        const publicUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/documents/file/${path.basename(file.path)}`
 
-        console.log("🔗 FileURL generado:", fileUrl);
+        console.log("🔗 FileURL generado:", publicUrl);
 
         // Crear documento
         const document = new Document({
@@ -132,7 +132,7 @@ router.post("/", authenticate, upload.array("documents", 10), validateDocumentUp
           content,
           originalFileName: file.originalname,
           filePath: file.path,
-          fileUrl, // ← ESTE CAMPO DEBERÍA GUARDARSE
+          fileUrl: publicUrl,
           fileSize: file.size,
           fileType: path.extname(file.originalname).substring(1).toLowerCase(),
           userId: req.user._id,

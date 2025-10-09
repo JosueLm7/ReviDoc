@@ -107,9 +107,9 @@ function DocumentUploadPage() {
       setUploadProgress({ ...newProgress });
 
       const formData = new FormData();
-      // ⚠️ CAMBIO IMPORTANTE: Usar "document" en lugar de "file"
-      formData.append("document", file); // ← Esto es lo que tu backend espera
-      formData.append("title", file.name); // Agrega título automáticamente
+      
+      formData.append("documents", file);
+      formData.append("title", file.name);
       formData.append("description", `Documento subido: ${file.name}`);
 
       console.log("📦 FormData contenido:");
@@ -123,7 +123,7 @@ function DocumentUploadPage() {
 
       // Simular progreso
       const progressInterval = setInterval(() => {
-        newProgress[i] = Math.min(newProgress[i] + 10, 90);
+        newProgress[i] = Math.min(newProgress[i] + 10, 100);
         setUploadProgress({ ...newProgress });
       }, 200);
 

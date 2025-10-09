@@ -23,6 +23,11 @@ const logger = require("./utils/logger")
 
 const app = express()
 
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' http://localhost:3000");
+  next();
+});
+
 // Security middleware
 app.use(
   helmet({

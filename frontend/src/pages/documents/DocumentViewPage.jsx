@@ -14,6 +14,11 @@ import {
   ChartBarIcon
 } from "@heroicons/react/24/outline"
 import { fetchDocumentById } from "../../store/slices/documentsSlice"
+import { Tab } from "@headlessui/react"
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ')
+}
 
 function DocumentViewPage() {
   const { id } = useParams()
@@ -22,6 +27,7 @@ function DocumentViewPage() {
 
   const { currentDocument, isLoading, error } = useSelector((state) => state.documents)
   const { user } = useSelector((state) => state.auth || {})
+  const [selectedTab, setSelectedTab] = useState(0)
 
   const [showReviews, setShowReviews] = useState(false)
 
@@ -256,40 +262,58 @@ function DocumentViewPage() {
           <div className="lg:col-span-3">
             <div className="bg-white rounded-2xl border border-gray-200/60 shadow-sm overflow-hidden">
               {/* Content Header */}
-              <div className="border-b border-gray-100 px-8 py-6 bg-gray-50/50">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-gray-900">Contenido del Documento</h2>
-                  {documentData.fileType === 'pdf' && documentData.fileUrl ? (
-                    <div className="w-full h-96 mb-6">
-                      <iframe 
-                        src={`${process.env.REACT_APP_API_URL}${documentData.fileUrl}`}
-                        className="w-full h-full border rounded-lg"
-                        title={`PDF: ${documentData.title}`}
-                      />
+              <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
+                <Tab.List className="flex space-x-2 border-b px-8 pt-6 bg-gray-50/50">
+                  {documentData.fileType === 'pdf' && documentData.fileUrl && (
+                    <Tab
+                      className={({ selected }) =>
+                        classNames(
+                          'px-4 py-2 font-semibold rounded-t-lg focus:outline-none',
+                          selected ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                        )
+                      }
+                    >
+                      Vista PDF
+                    </Tab>
+                  )}
+                  <Tab
+                    className={({ selected }) =>
+                      classNames(
+                        'px-4 py-2 font-semibold rounded-t-lg focus:outline-none',
+                        selected ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                      )
+                    }
+                  >
+                    Texto extraído
+                  </Tab>
+                </Tab.List>
+                <Tab.Panels>
+                  {/* PDF Panel */}
+                  {documentData.fileType === 'pdf' && documentData.fileUrl && (
+                    <Tab.Panel className="px-8 py-6">
+                      <div className="w-full h-96">
+                        <iframe
+                          src={documentData.fileUrl.startsWith("http") ? documentData.fileUrl : `${process.env.REACT_APP_API_URL}${documentData.fileUrl}`}
+                          className="w-full h-full border rounded-lg"
+                          title={`PDF: ${documentData.title}`}
+                        />
+                      </div>
                       <p className="text-sm text-gray-500 mt-2 text-center">
                         Vista previa del PDF. Usa el botón "Exportar" para descargar el archivo original.
                       </p>
-                    </div>
-                  ) : (
+                    </Tab.Panel>
+                  )}
+                  {/* Texto Panel */}
+                  <Tab.Panel className="px-8 py-6">
                     <div className="prose prose-lg max-w-none">
                       <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg font-light"
                         style={{ fontFamily: "Source Sans Pro, sans-serif", lineHeight: '1.8' }}>
                         {documentData.content || "Este documento no tiene contenido."}
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Document Content */}
-              <div className="p-8">
-                <div className="prose prose-lg max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg font-light"
-                    style={{ fontFamily: "Source Sans Pro, sans-serif", lineHeight: '1.8' }}>
-                    {documentData.content || "Este documento no tiene contenido."}
-                  </div>
-                </div>
-              </div>
+                  </Tab.Panel>
+                </Tab.Panels>
+              </Tab.Group>
             </div>
           </div>
 
