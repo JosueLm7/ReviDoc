@@ -24,9 +24,9 @@ const logger = require("./utils/logger")
 const app = express()
 
 app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' http://localhost:3000");
-  next();
-});
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' http://localhost:3000")
+  next()
+})
 
 // Security middleware
 app.use(
@@ -123,8 +123,10 @@ process.on("SIGTERM", () => {
 })
 
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
-  logger.info(`Servidor ejecutándose en puerto ${PORT}`)
-})
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    logger.info(`Servidor ejecutándose en puerto ${PORT}`)
+  })
+}
 
 module.exports = app

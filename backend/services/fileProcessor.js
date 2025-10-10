@@ -95,6 +95,11 @@ async function extractFromText(filePath) {
  * Clean and normalize extracted text
  */
 function cleanExtractedText(text) {
+
+  if (!text || typeof text !== 'string') {
+    return ''
+  }
+  
   return (
     text
       // Remove excessive whitespace
