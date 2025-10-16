@@ -1,0 +1,602 @@
+{
+	"info": {
+		"_postman_id": "b190ba14-ba06-4ce3-8c60-036ffd2e9aa9",
+		"name": "ReviDoc",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38755246"
+	},
+	"item": [
+		{
+			"name": "Usuarios",
+			"item": [
+				{
+					"name": "Registrar Usuario",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Juan Perez\",\r\n  \"email\": \"juan@ejemplo.com\",\r\n  \"password\": \"Secure123\",\r\n  \"role\": \"student\",\r\n  \"institution\": \"Universidad Nacional\",\r\n  \"department\": \"Ingeniería\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Autenticar Usuario",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"juan@ejemplo.com\",\r\n  \"password\": \"Secure123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Usuario Actual",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "JWT_SECRET",
+								"value": "b13a3aba1ee43788f84f25f10758399a661e1a3be2b6e2f70900a71dfe84cec5b15bc2f1af46a1663f5d4bf9b8fd80067a9c45001d18154562e71c81f0200d84",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cerrar Sesión",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Documentos",
+			"item": [
+				{
+					"name": "Subir Documento",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "documents",
+									"type": "file",
+									"src": "/D:/SEM9_Diseñoweb.pdf"
+								},
+								{
+									"key": "title",
+									"value": "Mi Ensayo Académico",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Ensayo sobre inteligencia artificial",
+									"type": "text"
+								},
+								{
+									"key": "category",
+									"value": "essay",
+									"type": "text"
+								},
+								{
+									"key": "academicLevel",
+									"value": "undergraduate",
+									"type": "text"
+								},
+								{
+									"key": "subject",
+									"value": "Ciencias de la Computación",
+									"type": "text"
+								},
+								{
+									"key": "citationStyle",
+									"value": "apa",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "IA, tecnología, educación",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/documents",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"documents"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Documentos",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/documents?page=1&limit=10&sort=-createdAt&status=pending",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"documents"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "-createdAt"
+								},
+								{
+									"key": "status",
+									"value": "pending"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Documento ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/documents/68f15c2bd41d211a4b8626ac",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"documents",
+								"68f15c2bd41d211a4b8626ac"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Documento",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Mi Ensayo Académico Actualizado\",\r\n  \"description\": \"Ensayo revisado sobre inteligencia artificial\",\r\n  \"category\": \"thesis\",\r\n  \"tags\": \"IA,tecnología,educación,machine learning\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/documents/68f15c2bd41d211a4b8626ac",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"documents",
+								"68f15c2bd41d211a4b8626ac"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Descargar Archivo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/documents/file/SEM9_DiseÃ±oweb-1760648234774-212631725.pdf",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"documents",
+								"file",
+								"SEM9_DiseÃ±oweb-1760648234774-212631725.pdf"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Review",
+			"item": [
+				{
+					"name": "Crear Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/reviews/68f15c2bd41d211a4b8626ac",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"reviews",
+								"68f15c2bd41d211a4b8626ac"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Reviews",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/reviews?page=1&limit=10&sort=-createdAt&status=completed",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"reviews"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "-createdAt"
+								},
+								{
+									"key": "status",
+									"value": "completed"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Review ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/reviews/68f16be20d8540fc1381b1e2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"reviews",
+								"68f16be20d8540fc1381b1e2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Agregar Feedback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"isHelpful\": true,\r\n  \"rating\": 5,\r\n  \"comments\": \"Excelente revisión, muy detallada y útil para mejorar mi documento\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/reviews/68f16be20d8540fc1381b1e2/feedback",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"reviews",
+								"68f16be20d8540fc1381b1e2",
+								"feedback"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Estadisticas",
+			"item": [
+				{
+					"name": "Obtener Estadistica",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/statistics/dashboard",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"statistics",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Tendencias",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Estadistica Usuario",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Generar Estadistica",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

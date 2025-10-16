@@ -1,0 +1,435 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "admin@example.com",
+      "name": "Admin User",
+      "role": "admin",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "lastLogin": "2025-01-16T14:30:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": "2",
+      "email": "user@example.com",
+      "name": "John Doe",
+      "role": "user",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=john",
+      "createdAt": "2024-02-20T08:00:00.000Z",
+      "lastLogin": "2025-01-16T09:15:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": "3",
+      "email": "jane@example.com",
+      "name": "Jane Smith",
+      "role": "user",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=jane",
+      "createdAt": "2024-03-10T12:00:00.000Z",
+      "lastLogin": "2025-01-15T16:45:00.000Z",
+      "isActive": true
+    },
+    {
+      "id": "4",
+      "email": "reviewer@example.com",
+      "name": "Maria Garcia",
+      "role": "reviewer",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=maria",
+      "createdAt": "2024-04-05T14:00:00.000Z",
+      "lastLogin": "2025-01-16T11:20:00.000Z",
+      "isActive": true
+    }
+  ],
+  "documents": [
+    {
+      "id": "1",
+      "title": "Análisis de Mercado 2025",
+      "filename": "analisis-mercado-2025.pdf",
+      "originalName": "Análisis de Mercado 2025.pdf",
+      "fileSize": 2456789,
+      "mimeType": "application/pdf",
+      "userId": "2",
+      "status": "completed",
+      "uploadedAt": "2025-01-10T10:30:00.000Z",
+      "processedAt": "2025-01-10T10:35:00.000Z",
+      "content": "Este documento presenta un análisis exhaustivo del mercado tecnológico para el año 2025. Se identifican las principales tendencias, oportunidades de crecimiento y desafíos que enfrentarán las empresas del sector. El análisis incluye datos de mercado, proyecciones financieras y recomendaciones estratégicas.",
+      "metadata": {
+        "pages": 45,
+        "wordCount": 8500,
+        "language": "es"
+      }
+    },
+    {
+      "id": "2",
+      "title": "Propuesta de Proyecto",
+      "filename": "propuesta-proyecto.docx",
+      "originalName": "Propuesta de Proyecto.docx",
+      "fileSize": 1234567,
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "userId": "2",
+      "status": "processing",
+      "uploadedAt": "2025-01-15T14:20:00.000Z",
+      "content": "Propuesta para el desarrollo de una plataforma de gestión documental con inteligencia artificial. El proyecto incluye análisis de requisitos, arquitectura del sistema, plan de implementación y presupuesto detallado.",
+      "metadata": {
+        "pages": 25,
+        "wordCount": 5200,
+        "language": "es"
+      }
+    },
+    {
+      "id": "3",
+      "title": "Informe Trimestral Q4",
+      "filename": "informe-q4-2024.pdf",
+      "originalName": "Informe Trimestral Q4 2024.pdf",
+      "fileSize": 3456789,
+      "mimeType": "application/pdf",
+      "userId": "3",
+      "status": "completed",
+      "uploadedAt": "2025-01-05T09:00:00.000Z",
+      "processedAt": "2025-01-05T09:10:00.000Z",
+      "content": "Informe financiero del cuarto trimestre de 2024. Incluye análisis de ingresos, gastos, rentabilidad y proyecciones para el próximo año fiscal. Se destacan los logros principales y áreas de mejora identificadas.",
+      "metadata": {
+        "pages": 32,
+        "wordCount": 6800,
+        "language": "es"
+      }
+    },
+    {
+      "id": "4",
+      "title": "Manual de Usuario",
+      "filename": "manual-usuario-v2.pdf",
+      "originalName": "Manual de Usuario v2.0.pdf",
+      "fileSize": 4567890,
+      "mimeType": "application/pdf",
+      "userId": "4",
+      "status": "completed",
+      "uploadedAt": "2025-01-12T11:45:00.000Z",
+      "processedAt": "2025-01-12T11:50:00.000Z",
+      "content": "Manual completo de usuario para la plataforma de gestión documental. Incluye guías paso a paso, capturas de pantalla, solución de problemas comunes y mejores prácticas de uso.",
+      "metadata": {
+        "pages": 68,
+        "wordCount": 12500,
+        "language": "es"
+      }
+    },
+    {
+      "id": "5",
+      "title": "Tesis Doctoral",
+      "filename": "tesis-doctoral.pdf",
+      "originalName": "Tesis Doctoral - IA en Educación.pdf",
+      "fileSize": 8901234,
+      "mimeType": "application/pdf",
+      "userId": "2",
+      "status": "failed",
+      "uploadedAt": "2025-01-14T16:00:00.000Z",
+      "error": "El archivo excede el límite de procesamiento",
+      "content": "Investigación sobre la aplicación de inteligencia artificial en sistemas educativos modernos.",
+      "metadata": {
+        "pages": 250,
+        "wordCount": 85000,
+        "language": "es"
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "id": "1",
+      "documentId": "1",
+      "userId": "4",
+      "status": "completed",
+      "createdAt": "2025-01-10T10:35:00.000Z",
+      "completedAt": "2025-01-10T10:40:00.000Z",
+      "overallScore": 85,
+      "feedback": "Documento bien estructurado con análisis sólido. Se recomienda ampliar la sección de conclusiones.",
+      "sections": [
+        {
+          "name": "Estructura",
+          "score": 90,
+          "comments": "Excelente organización y flujo lógico"
+        },
+        {
+          "name": "Contenido",
+          "score": 85,
+          "comments": "Información relevante y bien fundamentada"
+        },
+        {
+          "name": "Redacción",
+          "score": 80,
+          "comments": "Algunas frases podrían ser más concisas"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "documentId": "3",
+      "userId": "4",
+      "status": "completed",
+      "createdAt": "2025-01-05T09:10:00.000Z",
+      "completedAt": "2025-01-05T09:25:00.000Z",
+      "overallScore": 92,
+      "feedback": "Informe excelente con datos precisos y presentación profesional.",
+      "sections": [
+        {
+          "name": "Estructura",
+          "score": 95,
+          "comments": "Perfectamente organizado"
+        },
+        {
+          "name": "Contenido",
+          "score": 90,
+          "comments": "Datos completos y análisis profundo"
+        },
+        {
+          "name": "Redacción",
+          "score": 92,
+          "comments": "Lenguaje claro y profesional"
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "documentId": "4",
+      "userId": "4",
+      "status": "in_progress",
+      "createdAt": "2025-01-12T11:50:00.000Z",
+      "overallScore": null,
+      "feedback": null,
+      "sections": []
+    }
+  ],
+  "aiAnalysis": [
+    {
+      "id": "1",
+      "documentId": "1",
+      "type": "text_analysis",
+      "createdAt": "2025-01-10T10:35:00.000Z",
+      "results": {
+        "readabilityScore": 78,
+        "sentimentScore": 0.65,
+        "keyPhrases": [
+          "análisis de mercado",
+          "tendencias tecnológicas",
+          "oportunidades de crecimiento",
+          "proyecciones financieras"
+        ],
+        "summary": "Análisis completo del mercado tecnológico con enfoque en tendencias emergentes y oportunidades de inversión.",
+        "wordCount": 8500,
+        "sentenceCount": 425,
+        "paragraphCount": 85,
+        "averageWordsPerSentence": 20,
+        "complexityLevel": "advanced"
+      }
+    },
+    {
+      "id": "2",
+      "documentId": "3",
+      "type": "text_analysis",
+      "createdAt": "2025-01-05T09:10:00.000Z",
+      "results": {
+        "readabilityScore": 82,
+        "sentimentScore": 0.55,
+        "keyPhrases": ["informe financiero", "cuarto trimestre", "análisis de rentabilidad", "proyecciones fiscales"],
+        "summary": "Informe financiero detallado del Q4 2024 con análisis de rendimiento y proyecciones.",
+        "wordCount": 6800,
+        "sentenceCount": 340,
+        "paragraphCount": 68,
+        "averageWordsPerSentence": 20,
+        "complexityLevel": "intermediate"
+      }
+    },
+    {
+      "id": "3",
+      "documentId": "4",
+      "type": "text_analysis",
+      "createdAt": "2025-01-12T11:50:00.000Z",
+      "results": {
+        "readabilityScore": 88,
+        "sentimentScore": 0.7,
+        "keyPhrases": ["manual de usuario", "guía paso a paso", "solución de problemas", "mejores prácticas"],
+        "summary": "Manual completo y accesible para usuarios de la plataforma de gestión documental.",
+        "wordCount": 12500,
+        "sentenceCount": 625,
+        "paragraphCount": 125,
+        "averageWordsPerSentence": 20,
+        "complexityLevel": "basic"
+      }
+    }
+  ],
+  "plagiarismChecks": [
+    {
+      "id": "1",
+      "documentId": "1",
+      "createdAt": "2025-01-10T10:36:00.000Z",
+      "overallSimilarity": 12,
+      "status": "completed",
+      "sources": [
+        {
+          "url": "https://example.com/market-analysis-2024",
+          "title": "Market Analysis Report 2024",
+          "similarity": 8,
+          "matchedText": "principales tendencias del mercado tecnológico"
+        },
+        {
+          "url": "https://example.com/tech-trends",
+          "title": "Technology Trends Overview",
+          "similarity": 4,
+          "matchedText": "oportunidades de crecimiento en el sector"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "documentId": "3",
+      "createdAt": "2025-01-05T09:12:00.000Z",
+      "overallSimilarity": 5,
+      "status": "completed",
+      "sources": [
+        {
+          "url": "https://example.com/financial-report-template",
+          "title": "Financial Report Template",
+          "similarity": 5,
+          "matchedText": "análisis de ingresos y gastos trimestrales"
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "documentId": "4",
+      "createdAt": "2025-01-12T11:52:00.000Z",
+      "overallSimilarity": 18,
+      "status": "completed",
+      "sources": [
+        {
+          "url": "https://example.com/user-manual-template",
+          "title": "User Manual Template",
+          "similarity": 12,
+          "matchedText": "guía paso a paso para usuarios"
+        },
+        {
+          "url": "https://example.com/documentation-guide",
+          "title": "Documentation Best Practices",
+          "similarity": 6,
+          "matchedText": "solución de problemas comunes"
+        }
+      ]
+    }
+  ],
+  "suggestions": [
+    {
+      "id": "1",
+      "documentId": "1",
+      "createdAt": "2025-01-10T10:37:00.000Z",
+      "suggestions": [
+        {
+          "type": "grammar",
+          "severity": "medium",
+          "text": "Se recomienda revisar la concordancia verbal en el párrafo 3",
+          "position": { "start": 245, "end": 280 },
+          "suggestion": "Cambiar 'han sido' por 'ha sido'"
+        },
+        {
+          "type": "style",
+          "severity": "low",
+          "text": "Considere usar un lenguaje más conciso",
+          "position": { "start": 1200, "end": 1350 },
+          "suggestion": "Simplificar la frase eliminando redundancias"
+        },
+        {
+          "type": "clarity",
+          "severity": "high",
+          "text": "Esta sección podría ser más clara",
+          "position": { "start": 3400, "end": 3600 },
+          "suggestion": "Dividir el párrafo en dos para mejorar la legibilidad"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "documentId": "3",
+      "createdAt": "2025-01-05T09:13:00.000Z",
+      "suggestions": [
+        {
+          "type": "grammar",
+          "severity": "low",
+          "text": "Revisar el uso de comas en la lista",
+          "position": { "start": 890, "end": 920 },
+          "suggestion": "Agregar coma antes de 'y'"
+        },
+        {
+          "type": "formatting",
+          "severity": "medium",
+          "text": "Inconsistencia en el formato de números",
+          "position": { "start": 2100, "end": 2150 },
+          "suggestion": "Usar el mismo formato para todos los valores monetarios"
+        }
+      ]
+    }
+  ],
+  "statistics": [
+    {
+      "id": "dashboard",
+      "type": "dashboard",
+      "data": {
+        "totalDocuments": 5,
+        "totalUsers": 4,
+        "totalReviews": 3,
+        "documentsThisMonth": 3,
+        "averageProcessingTime": 5.2,
+        "successRate": 80,
+        "topUsers": [
+          { "userId": "2", "documentCount": 3 },
+          { "userId": "3", "documentCount": 1 },
+          { "userId": "4", "documentCount": 1 }
+        ],
+        "documentsByStatus": {
+          "completed": 3,
+          "processing": 1,
+          "failed": 1
+        }
+      }
+    },
+    {
+      "id": "trends",
+      "type": "trends",
+      "data": {
+        "daily": [
+          { "date": "2025-01-10", "documents": 1, "reviews": 1 },
+          { "date": "2025-01-11", "documents": 0, "reviews": 0 },
+          { "date": "2025-01-12", "documents": 1, "reviews": 1 },
+          { "date": "2025-01-13", "documents": 0, "reviews": 0 },
+          { "date": "2025-01-14", "documents": 1, "reviews": 0 },
+          { "date": "2025-01-15", "documents": 1, "reviews": 0 },
+          { "date": "2025-01-16", "documents": 0, "reviews": 0 }
+        ],
+        "weekly": [
+          { "week": "2025-W01", "documents": 2, "reviews": 1 },
+          { "week": "2025-W02", "documents": 3, "reviews": 2 }
+        ]
+      }
+    }
+  ],
+  "aiModels": [
+    {
+      "id": "gpt-4",
+      "name": "GPT-4",
+      "provider": "OpenAI",
+      "capabilities": ["text_analysis", "suggestions", "chat"],
+      "isAvailable": true
+    },
+    {
+      "id": "claude-3",
+      "name": "Claude 3",
+      "provider": "Anthropic",
+      "capabilities": ["text_analysis", "suggestions"],
+      "isAvailable": true
+    },
+    {
+      "id": "plagiarism-detector",
+      "name": "Plagiarism Detector",
+      "provider": "Custom",
+      "capabilities": ["plagiarism"],
+      "isAvailable": true
+    }
+  ]
+}

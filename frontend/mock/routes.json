@@ -1,0 +1,23 @@
+{
+  "/api/*": "/$1",
+  "/api/auth/login": "/auth/login",
+  "/api/auth/register": "/auth/register",
+  "/api/auth/logout": "/auth/logout",
+  "/api/auth/me": "/auth/me",
+  "/api/users": "/users",
+  "/api/users/:id": "/users/:id",
+  "/api/users/:id/statistics": "/users/:id/statistics",
+  "/api/documents": "/documents",
+  "/api/documents/:id": "/documents/:id",
+  "/api/documents/file/:filename": "/documents/file/:filename",
+  "/api/reviews": "/reviews",
+  "/api/reviews/:id": "/reviews/:id",
+  "/api/reviews/:documentId": "/reviews?documentId=:documentId",
+  "/api/ai/analyze": "/aiAnalysis",
+  "/api/ai/plagiarism": "/plagiarismChecks",
+  "/api/ai/suggestions": "/suggestions",
+  "/api/ai/models": "/aiModels",
+  "/api/statistics/dashboard": "/statistics/dashboard",
+  "/api/statistics/trends": "/statistics/trends",
+  "/api/statistics/users": "/statistics/users"
+}
