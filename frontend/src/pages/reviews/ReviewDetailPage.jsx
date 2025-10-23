@@ -1,1 +1,511 @@
+"use client"
 
+import { useState, useEffect } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchReviewById, updateReview } from "../../store/slices/reviewsSlice"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
+import { Badge } from "../../../../components/ui/badge"
+import { Textarea } from "../../../../components/ui/textarea"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Progress } from "../../../../components/ui/progress"
+import {
+  Brain,
+  AlertTriangle,
+  CheckCircle,
+  User,
+  Calendar,
+  Download,
+  Edit,
+  MessageSquare,
+  TrendingUp,
+  Target,
+  BookOpen,
+} from "lucide-react"
+import { toast } from "../../../../hooks/use-toast"
+
+const ReviewDetailPage = () => {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const { currentReview: review, loading, error } = useSelector((state) => state.reviews)
+  const { user } = useSelector((state) => state.auth)
+
+  const [feedback, setFeedback] = useState("")
+  const [isEditing, setIsEditing] = useState(false)
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchReviewById(id))
+    }
+  }, [dispatch, id])
+
+  useEffect(() => {
+    if (review) {
+      setFeedback(review.teacherFeedback || "")
+    }
+  }, [review])
+
+  const handleSaveFeedback = async () => {
+    try {
+      await dispatch(
+        updateReview({
+          id: review._id,
+          teacherFeedback: feedback,
+          status: "reviewed",
+        }),
+      ).unwrap()
+
+      setIsEditing(false)
+      toast({
+        title: "Retroalimentación guardada",
+        description: "La retroalimentación ha sido guardada correctamente.",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo guardar la retroalimentación.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-800"
+      case "processing":
+        return "bg-yellow-100 text-yellow-800"
+      case "reviewed":
+        return "bg-blue-100 text-blue-800"
+      case "failed":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getScoreColor = (score) => {
+    if (score >= 80) return "text-green-600"
+    if (score >= 60) return "text-yellow-600"
+    return "text-red-600"
+  }
+
+  const downloadReport = () => {
+    const reportData = {
+      document: review.document.title,
+      analysis: review.analysis,
+      suggestions: review.suggestions,
+      plagiarismCheck: review.plagiarismCheck,
+      date: new Date(review.createdAt).toLocaleDateString(),
+    }
+
+    const dataStr = JSON.stringify(reportData, null, 2)
+    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
+    const exportFileDefaultName = `reporte-${review.document.title}-${new Date().toISOString().split("T")[0]}.json`
+
+    const linkElement = document.createElement("a")
+    linkElement.setAttribute("href", dataUri)
+    linkElement.setAttribute("download", exportFileDefaultName)
+    linkElement.click()
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (error || !review) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Error al cargar la revisión</h2>
+          <p className="text-gray-600 mb-4">{error || "Revisión no encontrada"}</p>
+          <Button onClick={() => navigate("/reviews")}>Volver a Revisiones</Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* Header */}
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Revisión: {review.document.title}</h1>
+          <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center">
+              <User className="w-4 h-4 mr-1" />
+              {review.document.author}
+            </div>
+            <div className="flex items-center">
+              <Calendar className="w-4 h-4 mr-1" />
+              {new Date(review.createdAt).toLocaleDateString()}
+            </div>
+            <Badge className={getStatusColor(review.status)}>
+              {review.status === "completed"
+                ? "Completado"
+                : review.status === "processing"
+                  ? "Procesando"
+                  : review.status === "reviewed"
+                    ? "Revisado"
+                    : "Fallido"}
+            </Badge>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={downloadReport}>
+            <Download className="w-4 h-4 mr-2" />
+            Descargar Reporte
+          </Button>
+          {user?.role === "teacher" && (
+            <Button onClick={() => setIsEditing(!isEditing)} variant={isEditing ? "secondary" : "default"}>
+              <Edit className="w-4 h-4 mr-2" />
+              {isEditing ? "Cancelar" : "Editar"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Puntuación general */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <TrendingUp className="w-5 h-5 mr-2" />
+            Puntuación General
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="text-center">
+              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.overallScore || 0)}`}>
+                {review.analysis?.overallScore || 0}%
+              </div>
+              <p className="text-sm text-gray-600">Puntuación Total</p>
+            </div>
+            <div className="text-center">
+              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.grammarScore || 0)}`}>
+                {review.analysis?.grammarScore || 0}%
+              </div>
+              <p className="text-sm text-gray-600">Gramática</p>
+            </div>
+            <div className="text-center">
+              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.coherenceScore || 0)}`}>
+                {review.analysis?.coherenceScore || 0}%
+              </div>
+              <p className="text-sm text-gray-600">Coherencia</p>
+            </div>
+            <div className="text-center">
+              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.styleScore || 0)}`}>
+                {review.analysis?.styleScore || 0}%
+              </div>
+              <p className="text-sm text-gray-600">Estilo</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="analysis" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="analysis">
+            <Brain className="w-4 h-4 mr-2" />
+            Análisis IA
+          </TabsTrigger>
+          <TabsTrigger value="plagiarism">
+            <AlertTriangle className="w-4 h-4 mr-2" />
+            Plagio
+          </TabsTrigger>
+          <TabsTrigger value="suggestions">
+            <Target className="w-4 h-4 mr-2" />
+            Sugerencias
+          </TabsTrigger>
+          <TabsTrigger value="feedback">
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Retroalimentación
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analysis">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Análisis Gramatical</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Errores encontrados</span>
+                    <span className="font-semibold">{review.analysis?.grammarErrors?.length || 0}</span>
+                  </div>
+                  <Progress value={review.analysis?.grammarScore || 0} className="h-2" />
+                </div>
+
+                {review.analysis?.grammarErrors?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Errores principales:</h4>
+                    <ul className="space-y-1">
+                      {review.analysis.grammarErrors.slice(0, 5).map((error, index) => (
+                        <li key={index} className="text-sm text-red-600 flex items-start">
+                          <AlertTriangle className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
+                          {error.message}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Análisis de Coherencia</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Puntuación de coherencia</span>
+                    <span className="font-semibold">{review.analysis?.coherenceScore || 0}%</span>
+                  </div>
+                  <Progress value={review.analysis?.coherenceScore || 0} className="h-2" />
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="font-medium">Aspectos evaluados:</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex items-center">
+                      <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
+                      Estructura del documento
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
+                      Transiciones entre párrafos
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
+                      Flujo de ideas
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Análisis de Estilo</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Puntuación de estilo</span>
+                    <span className="font-semibold">{review.analysis?.styleScore || 0}%</span>
+                  </div>
+                  <Progress value={review.analysis?.styleScore || 0} className="h-2" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Palabras:</span>
+                    <span className="ml-2 font-semibold">{review.analysis?.wordCount || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Párrafos:</span>
+                    <span className="ml-2 font-semibold">{review.analysis?.paragraphCount || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Legibilidad:</span>
+                    <span className="ml-2 font-semibold">{review.analysis?.readabilityScore || 0}%</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Complejidad:</span>
+                    <span className="ml-2 font-semibold">{review.analysis?.complexityLevel || "Media"}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Análisis de Citas</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Citas encontradas</span>
+                    <span className="font-semibold">{review.analysis?.citationCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Formato correcto</span>
+                    <span className="font-semibold">{review.analysis?.correctCitations || 0}</span>
+                  </div>
+                </div>
+
+                {review.analysis?.citationIssues?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Problemas encontrados:</h4>
+                    <ul className="space-y-1">
+                      {review.analysis.citationIssues.slice(0, 3).map((issue, index) => (
+                        <li key={index} className="text-sm text-yellow-600 flex items-start">
+                          <AlertTriangle className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
+                          {issue}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="plagiarism">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <AlertTriangle className="w-5 h-5 mr-2" />
+                Detección de Plagio
+              </CardTitle>
+              <CardDescription>Análisis de similitud con fuentes externas</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center">
+                <div
+                  className={`text-4xl font-bold mb-2 ${
+                    (review.plagiarismCheck?.similarityPercentage || 0) < 15
+                      ? "text-green-600"
+                      : (review.plagiarismCheck?.similarityPercentage || 0) < 30
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                  }`}
+                >
+                  {review.plagiarismCheck?.similarityPercentage || 0}%
+                </div>
+                <p className="text-gray-600">Similitud detectada</p>
+              </div>
+
+              {review.plagiarismCheck?.matches?.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-4">Coincidencias encontradas:</h4>
+                  <div className="space-y-4">
+                    {review.plagiarismCheck.matches.map((match, index) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h5 className="font-medium">{match.source}</h5>
+                          <Badge variant="outline">{match.percentage}% similar</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{match.text}</p>
+                        <a
+                          href={match.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          Ver fuente original
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(review.plagiarismCheck?.similarityPercentage || 0) === 0 && (
+                <div className="text-center py-8">
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-green-600 mb-2">No se detectó plagio</h3>
+                  <p className="text-gray-600">El documento parece ser original</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="suggestions">
+          <div className="space-y-6">
+            {review.suggestions?.map((category, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BookOpen className="w-5 h-5 mr-2" />
+                    {category.category}
+                  </CardTitle>
+                  <CardDescription>{category.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {category.suggestions?.map((suggestion, suggestionIndex) => (
+                      <div key={suggestionIndex} className="border-l-4 border-blue-500 pl-4">
+                        <h4 className="font-medium mb-1">{suggestion.title}</h4>
+                        <p className="text-sm text-gray-600 mb-2">{suggestion.description}</p>
+                        {suggestion.example && (
+                          <div className="bg-gray-50 p-3 rounded text-sm">
+                            <strong>Ejemplo:</strong> {suggestion.example}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="feedback">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Retroalimentación del Docente
+              </CardTitle>
+              <CardDescription>Comentarios y sugerencias personalizadas</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isEditing ? (
+                <div className="space-y-4">
+                  <Textarea
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="Escribe tu retroalimentación aquí..."
+                    rows={8}
+                  />
+                  <div className="flex gap-2">
+                    <Button onClick={handleSaveFeedback} disabled={loading}>
+                      {loading ? "Guardando..." : "Guardar Retroalimentación"}
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsEditing(false)}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {review.teacherFeedback ? (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <p className="whitespace-pre-wrap">{review.teacherFeedback}</p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p>Aún no hay retroalimentación del docente</p>
+                      {user?.role === "teacher" && (
+                        <Button className="mt-4" onClick={() => setIsEditing(true)}>
+                          Agregar Retroalimentación
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
+
+export default ReviewDetailPage

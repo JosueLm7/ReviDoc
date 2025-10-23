@@ -1,12 +1,10 @@
-const OpenAI = require("openai")
+const { GoogleGenerativeAI } = require("@google/generative-ai")
 const natural = require("natural")
 const compromise = require("compromise")
 const logger = require("../utils/logger")
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Initialize Google Gemini client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
 
 // Initialize Natural.js components
 const tokenizer = new natural.WordTokenizer()
@@ -85,13 +83,13 @@ async function analyzeText(text, options = {}) {
  */
 async function analyzeGrammar(text, language) {
   try {
-    // Use OpenAI for advanced grammar analysis
+    // Use Gemini for advanced grammar analysis
     const prompt = `Analiza la gramática y ortografía del siguiente texto en ${language === "es" ? "español" : "inglés"}. 
     Identifica errores específicos y proporciona correcciones:
 
     "${text}"
 
-    Responde en formato JSON con la siguiente estructura:
+    Responde EXCLUSIVAMENTE en formato JSON con la siguiente estructura:
     {
       "score": número del 0-100,
       "spellingScore": número del 0-100,
@@ -107,22 +105,31 @@ async function analyzeGrammar(text, language) {
       ]
     }`
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-      max_tokens: 2000,
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 2000,
+      }
     })
 
-    const result = JSON.parse(response.choices[0].message.content)
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const responseText = response.text()
+    
+    // Clean the response to extract only JSON
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+    const cleanResponse = jsonMatch ? jsonMatch[0] : responseText
+    
+    const analysisResult = JSON.parse(cleanResponse)
 
     // Add confidence scores to issues
-    result.issues = result.issues.map((issue) => ({
+    analysisResult.issues = analysisResult.issues.map((issue) => ({
       ...issue,
       confidence: Math.random() * 0.3 + 0.7, // Simulate confidence between 0.7-1.0
     }))
 
-    return result
+    return analysisResult
   } catch (error) {
     logger.error("Error en análisis gramatical:", error)
     // Fallback to basic analysis
@@ -252,10 +259,10 @@ async function analyzeCitations(text, citationStyle) {
 
     // Basic citation pattern matching
     const citationPatterns = {
-      apa: /$$[A-Za-z]+,?\s+\d{4}$$/g,
+      apa: /[A-Za-z]+,?\s+\d{4}/g,
       ieee: /\[\d+\]/g,
-      mla: /$$[A-Za-z]+\s+\d+$$/g,
-      chicago: /$$[A-Za-z]+\s+\d{4},?\s+\d+$$/g,
+      mla: /[A-Za-z]+\s+\d+/g,
+      chicago: /[A-Za-z]+\s+\d{4},?\s+\d+/g,
     }
 
     const pattern = citationPatterns[citationStyle]
@@ -354,7 +361,7 @@ async function generateSuggestions(text, options = {}) {
     4. Uso de evidencia y citas (formato ${citationStyle.toUpperCase()})
     5. Conclusiones y argumentación
 
-    Responde en formato JSON:
+    Responde EXCLUSIVAMENTE en formato JSON:
     {
       "suggestions": [
         {
@@ -367,15 +374,24 @@ async function generateSuggestions(text, options = {}) {
       ]
     }`
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 1500,
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1500,
+      }
     })
 
-    const result = JSON.parse(response.choices[0].message.content)
-    return result.suggestions
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const responseText = response.text()
+    
+    // Clean the response to extract only JSON
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+    const cleanResponse = jsonMatch ? jsonMatch[0] : responseText
+    
+    const resultData = JSON.parse(cleanResponse)
+    return resultData.suggestions
   } catch (error) {
     logger.error("Error generando sugerencias:", error)
     // Fallback suggestions

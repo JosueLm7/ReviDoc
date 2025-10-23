@@ -959,6 +959,301 @@ curl -X POST http://localhost:5000/api/statistics/generate \
 
 ---
 
+## IA (Artificial Intelligence) - Gemini
+
+### 1. Analizar Texto con IA
+
+**Descripción:** Analiza un texto usando el modelo Gemini de Google. El sistema realiza análisis completo incluyendo gramática, estilo, coherencia y genera sugerencias de mejora. Requiere autenticación.
+
+**Comando:**
+\`\`\`bash
+curl -X POST http://localhost:5000/api/ai/analyze \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+-H "Content-Type: application/json" \
+-d '{
+  "text": "Los estudiantes esta aprendiendo sobre inteligencia artificial. Este tema es muy importante para el futuro de la educacion. La IA puede ayudar a los profesores a personalizar el aprendizaje.",
+  "language": "es",
+  "citationStyle": "apa"
+}'
+\`\`\`
+
+**Respuesta Esperada:**
+\`\`\`json
+{
+  "success": true,
+  "message": "Análisis completado exitosamente",
+  "data": {
+    "analysis": {
+      "summary": "El texto contiene errores gramaticales y ortográficos que deben corregirse. La estructura es clara pero podría mejorarse la coherencia entre párrafos.",
+      "grammar": {
+        "score": 75,
+        "issues": [
+          {
+            "text": "Los estudiantes esta aprendiendo",
+            "suggestion": "Los estudiantes están aprendiendo",
+            "explanation": "Concordancia verbal incorrecta"
+          }
+        ]
+      },
+      "style": {
+        "score": 80,
+        "suggestions": [
+          "Usar vocabulario más académico en algunos puntos",
+          "Mejorar la transición entre párrafos"
+        ]
+      },
+      "coherence": {
+        "score": 82,
+        "feedback": "El texto mantiene una estructura lógica, pero podría fortalecer las conexiones entre ideas"
+      },
+      "recommendations": [
+        "Revisar la ortografía de 'educacion' → 'educación'",
+        "Agregar citas para respaldar las afirmaciones sobre IA",
+        "Expandir la conclusión con ejemplos específicos"
+      ]
+    },
+    "processingTime": 2345,
+    "metadata": {
+      "textLength": 187,
+      "wordCount": 32,
+      "language": "es",
+      "citationStyle": "apa"
+    }
+  }
+}
+\`\`\`
+
+---
+
+### 2. Detectar Plagio
+
+**Descripción:** Verifica la originalidad del texto comparándolo con fuentes disponibles usando Gemini. Detecta similitudes y proporciona un porcentaje de originalidad.
+
+**Comando:**
+\`\`\`bash
+curl -X POST http://localhost:5000/api/ai/plagiarism \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+-H "Content-Type: application/json" \
+-d '{
+  "text": "La inteligencia artificial es una rama de la informática que busca crear máquinas inteligentes capaces de realizar tareas que normalmente requieren inteligencia humana.",
+  "language": "es"
+}'
+\`\`\`
+
+**Respuesta Esperada:**
+\`\`\`json
+{
+  "success": true,
+  "message": "Detección de plagio completada",
+  "data": {
+    "plagiarismResult": {
+      "overallSimilarity": 18,
+      "isOriginal": true,
+      "confidence": 0.94,
+      "sources": [
+        {
+          "url": "https://ejemplo.com/articulo-ia",
+          "title": "Introducción a la Inteligencia Artificial",
+          "similarity": 12,
+          "matchedSegments": [
+            {
+              "original": "La inteligencia artificial es una rama de la informática",
+              "source": "AI es una rama de la informática"
+            }
+          ]
+        },
+        {
+          "url": "https://wikipedia.org/ia",
+          "title": "Inteligencia Artificial - Wikipedia",
+          "similarity": 6,
+          "matchedSegments": [
+            {
+              "original": "máquinas inteligentes capaces de realizar tareas",
+              "source": "máquinas capaces de realizar tareas inteligentes"
+            }
+          ]
+        }
+      ],
+      "recommendations": [
+        "El texto tiene un nivel de originalidad aceptable",
+        "Considera parafrasear algunos segmentos para mayor originalidad",
+        "Agrega citas apropiadas para las fuentes identificadas"
+      ]
+    },
+    "processingTime": 3456,
+    "metadata": {
+      "textLength": 156,
+      "wordCount": 28,
+      "language": "es"
+    }
+  }
+}
+\`\`\`
+
+---
+
+### 3. Generar Sugerencias de Mejora
+
+**Descripción:** Genera sugerencias específicas de mejora para un texto usando Gemini. Proporciona recomendaciones contextualizadas según el tipo de documento y nivel académico.
+
+**Comando:**
+\`\`\`bash
+curl -X POST http://localhost:5000/api/ai/suggestions \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+-H "Content-Type: application/json" \
+-d '{
+  "text": "El cambio climático es un problema importante. Muchas personas piensan que es real. Los científicos dicen que es causado por el ser humano. Debemos hacer algo al respecto.",
+  "language": "es",
+  "citationStyle": "apa",
+  "category": "essay"
+}'
+\`\`\`
+
+**Respuesta Esperada:**
+\`\`\`json
+{
+  "success": true,
+  "message": "Sugerencias generadas exitosamente",
+  "data": {
+    "suggestions": {
+      "structure": [
+        {
+          "issue": "Falta de introducción clara",
+          "suggestion": "Comienza con una tesis clara que establezca tu posición sobre el cambio climático",
+          "example": "El cambio climático representa uno de los desafíos más urgentes del siglo XXI, requiriendo acción inmediata a nivel global."
+        },
+        {
+          "issue": "Párrafos muy cortos",
+          "suggestion": "Desarrolla cada idea con más profundidad y evidencia",
+          "example": "Expande cada párrafo con datos, estudios o ejemplos específicos"
+        }
+      ],
+      "content": [
+        {
+          "issue": "Afirmaciones sin respaldo",
+          "suggestion": "Respalda tus afirmaciones con citas y referencias",
+          "example": "En lugar de 'Los científicos dicen', usa: 'Según el IPCC (2023), el 97% de los científicos climáticos concuerdan que...'"
+        },
+        {
+          "issue": "Lenguaje vago",
+          "suggestion": "Usa términos más específicos y académicos",
+          "example": "Reemplaza 'Debemos hacer algo' con 'Se requieren políticas de reducción de emisiones de carbono y transición a energías renovables'"
+        }
+      ],
+      "academicStyle": [
+        {
+          "issue": "Tono informal",
+          "suggestion": "Mantén un tono más formal y académico",
+          "priority": "high"
+        },
+        {
+          "issue": "Falta de conclusión",
+          "suggestion": "Agrega una conclusión que resuma tus puntos principales y refuerce tu tesis",
+          "priority": "high"
+        }
+      ],
+      "citations": [
+        {
+          "suggestion": "Agrega referencias a estudios científicos sobre cambio climático",
+          "format": "APA",
+          "example": "IPCC. (2023). Climate Change 2023: Synthesis Report. Cambridge University Press."
+        }
+      ]
+    },
+    "processingTime": 2876,
+    "metadata": {
+      "textLength": 198,
+      "wordCount": 35,
+      "language": "es",
+      "citationStyle": "apa",
+      "category": "essay"
+    }
+  }
+}
+\`\`\`
+
+---
+
+### 4. Obtener Modelos de IA Disponibles
+
+**Descripción:** Obtiene la lista de modelos de IA disponibles en el sistema, incluyendo sus capacidades, idiomas soportados y descripción. Útil para entender qué modelos están disponibles para análisis.
+
+**Comando:**
+\`\`\`bash
+curl -X GET http://localhost:5000/api/ai/models \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+\`\`\`
+
+**Respuesta Esperada:**
+\`\`\`json
+{
+  "success": true,
+  "data": {
+    "models": [
+      {
+        "id": "gemini-pro",
+        "name": "Gemini Pro",
+        "provider": "Google",
+        "capabilities": [
+          "grammar",
+          "style",
+          "coherence",
+          "suggestions",
+          "plagiarism",
+          "analysis"
+        ],
+        "languages": [
+          "es",
+          "en",
+          "fr",
+          "de",
+          "pt"
+        ],
+        "description": "Modelo avanzado de Google para análisis completo de texto con soporte multiidioma",
+        "maxTokens": 8000,
+        "costPerRequest": "low"
+      },
+      {
+        "id": "openai-gpt-4",
+        "name": "GPT-4",
+        "provider": "OpenAI",
+        "capabilities": [
+          "grammar",
+          "style",
+          "coherence",
+          "suggestions"
+        ],
+        "languages": [
+          "es",
+          "en"
+        ],
+        "description": "Modelo avanzado para análisis completo de texto",
+        "maxTokens": 8000,
+        "costPerRequest": "medium"
+      },
+      {
+        "id": "huggingface-bert",
+        "name": "BERT",
+        "provider": "Hugging Face",
+        "capabilities": [
+          "grammar",
+          "classification"
+        ],
+        "languages": [
+          "es",
+          "en"
+        ],
+        "description": "Modelo especializado en análisis gramatical y clasificación",
+        "maxTokens": 512,
+        "costPerRequest": "low"
+      }
+    ]
+  }
+}
+\`\`\`
+
+---
+
 ## Notas Importantes
 
 ### Autenticación

@@ -183,9 +183,9 @@ router.get("/models", authenticate, (req, res) => {
   try {
     const models = [
       {
-        id: "openai-gpt-4",
-        name: "GPT-4",
-        provider: "OpenAI",
+        id: "gemini-2.5-flash",
+        name: "flash-2.5",
+        provider: "GeminiAI",
         capabilities: ["grammar", "style", "coherence", "suggestions"],
         languages: ["es", "en"],
         description: "Modelo avanzado para análisis completo de texto",

@@ -12,6 +12,16 @@
 				{
 					"name": "Registrar Usuario",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -42,6 +52,16 @@
 				{
 					"name": "Autenticar Usuario",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -575,24 +595,264 @@
 				{
 					"name": "Obtener Tendencias",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/statistics/trends?days=30",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"statistics",
+								"trends"
+							],
+							"query": [
+								{
+									"key": "days",
+									"value": "30"
+								}
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Obtener Estadistica Usuario",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/statistics/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"statistics",
+								"users"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Generar Estadistica",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYwNjQ3NjgzLCJleHAiOjE3NjEyNTI0ODN9.0pw1xyZVARoC8i1c7vMHoF1y2TYRcHUdkXpmhHGGd_c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"startDate\": \"2025-01-01\",\r\n  \"endDate\": \"2025-01-16\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/statistics/generate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"statistics",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Inteligencia Artificial",
+			"item": [
+				{
+					"name": "Analizar Texto",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYxMjUwMDUyLCJleHAiOjE3NjE4NTQ4NTJ9.EyoZIyybyfavKeWQrsZ8leWOafhB70DUF9LxIYyynJw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"text\": \"Los estudiantes esta aprendiendo sobre inteligencia artificial. Este tema es muy importante para el futuro de la educacion. La IA puede ayudar a los profesores a personalizar el aprendizaje.\",\r\n  \"language\": \"es\",\r\n  \"citationStyle\": \"apa\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/ai/analyze",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"ai",
+								"analyze"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Detectar Plagio",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYxMjUwMDUyLCJleHAiOjE3NjE4NTQ4NTJ9.EyoZIyybyfavKeWQrsZ8leWOafhB70DUF9LxIYyynJw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"text\": \"La inteligencia artificial es una rama de la informática que busca crear máquinas inteligentes capaces de realizar tareas que normalmente requieren inteligencia humana.\",\r\n  \"language\": \"es\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/ai/plagiarism",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"ai",
+								"plagiarism"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generar Sugerencias",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYxMjUwMDUyLCJleHAiOjE3NjE4NTQ4NTJ9.EyoZIyybyfavKeWQrsZ8leWOafhB70DUF9LxIYyynJw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"text\": \"El cambio climático es un problema importante. Muchas personas piensan que es real. Los científicos dicen que es causado por el ser humano. Debemos hacer algo al respecto.\",\r\n  \"language\": \"es\",\r\n  \"citationStyle\": \"apa\",\r\n  \"category\": \"essay\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/ai/suggestions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"ai",
+								"suggestions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Modelos de IA",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZjE1OTliZDQxZDIxMWE0Yjg2MjY5YiIsImVtYWlsIjoianVhbkBlamVtcGxvLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzYxMjUwMDUyLCJleHAiOjE3NjE4NTQ4NTJ9.EyoZIyybyfavKeWQrsZ8leWOafhB70DUF9LxIYyynJw",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/ai/models",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"ai",
+								"models"
+							]
+						}
 					},
 					"response": []
 				}

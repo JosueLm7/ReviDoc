@@ -105,6 +105,10 @@ export const authAPI = {
   register: (userData) => api.post("/auth/register", userData),
   logout: () => api.post("/auth/logout"),
   getCurrentUser: () => api.get("/auth/me"),
+  
+  // ✅ AGREGADO: Funciones para perfil y contraseña
+  updateProfile: (profileData) => api.put("/auth/profile", profileData),
+  changePassword: (passwordData) => api.put("/auth/password", passwordData),
 }
 
 // Users API
@@ -114,6 +118,10 @@ export const usersAPI = {
   updateUser: (id, data) => api.put(`/users/${id}`, data),
   deleteUser: (id) => api.delete(`/users/${id}`),
   getUserStatistics: (id) => api.get(`/users/${id}/statistics`),
+  
+  // ✅ AGREGADO: Alternativa para funciones de perfil (si prefieres esta ruta)
+  updateUserProfile: (id, profileData) => api.put(`/users/${id}/profile`, profileData),
+  changeUserPassword: (id, passwordData) => api.put(`/users/${id}/password`, passwordData),
 }
 
 // Documents API
@@ -171,6 +179,15 @@ export const statisticsAPI = {
   getTrends: (params) => api.get("/statistics/trends", { params }),
   getUserStats: () => api.get("/statistics/users"),
   generateStats: (data) => api.post("/statistics/generate", data),
+}
+
+// ✅ AGREGADO: Profile API (para agrupar funciones relacionadas con perfil)
+export const profileAPI = {
+  updateProfile: (profileData) => api.put("/auth/profile", profileData),
+  changePassword: (passwordData) => api.put("/auth/password", passwordData),
+  uploadAvatar: (formData) => api.post("/auth/avatar", formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
 }
 
 export default api
