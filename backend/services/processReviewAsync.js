@@ -55,7 +55,6 @@ async function processReviewAsync(reviewId, document) {
 
     await review.save()
 
-    // Update document status
     document.status = "completed"
     document.metadata.processingTime = processingTime
     document.metadata.aiModel = analysis.metadata.model

@@ -24,7 +24,7 @@ router.post("/register", validateUserRegistration, async (req, res) => {
 
     // Create new user
     const user = new User({
-      name, 
+      name,
       email,
       password,
       role: role || "student",
@@ -124,6 +124,107 @@ router.get("/me", authenticate, async (req, res) => {
     })
   } catch (error) {
     logger.error("Error obteniendo usuario actual:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    })
+  }
+})
+
+// @route   PUT /api/auth/profile
+// @desc    Update user profile
+// @access  Private
+router.put("/profile", authenticate, async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, bio, location, institution, department, preferences } = req.body
+
+    const user = await User.findById(req.user._id)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado",
+      })
+    }
+
+    // Update fields if provided
+    if (firstName) user.firstName = firstName
+    if (lastName) user.lastName = lastName
+    if (email) user.email = email
+    if (phone) user.phone = phone
+    if (bio) user.bio = bio
+    if (location) user.location = location
+    if (institution) user.institution = institution
+    if (department) user.department = department
+    if (preferences) {
+      user.preferences = { ...user.preferences, ...preferences }
+    }
+
+    await user.save()
+
+    const userResponse = user.toObject()
+    delete userResponse.password
+
+    logger.info(`Perfil actualizado: ${user.email}`)
+
+    res.json({
+      success: true,
+      message: "Perfil actualizado exitosamente",
+      data: { user: userResponse },
+    })
+  } catch (error) {
+    logger.error("Error actualizando perfil:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+    })
+  }
+})
+
+// @route   PUT /api/auth/password
+// @desc    Change user password
+// @access  Private
+router.put("/password", authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Contraseña actual y nueva son requeridas",
+      })
+    }
+
+    const user = await User.findById(req.user._id).select("+password")
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado",
+      })
+    }
+
+    // Verify current password
+    const isPasswordValid = await user.comparePassword(currentPassword)
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Contraseña actual incorrecta",
+      })
+    }
+
+    // Update password
+    user.password = newPassword
+    await user.save()
+
+    logger.info(`Contraseña actualizada: ${user.email}`)
+
+    res.json({
+      success: true,
+      message: "Contraseña actualizada exitosamente",
+    })
+  } catch (error) {
+    logger.error("Error cambiando contraseña:", error)
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
