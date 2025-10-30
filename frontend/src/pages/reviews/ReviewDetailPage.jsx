@@ -23,14 +23,14 @@ import {
   Target,
   BookOpen,
 } from "lucide-react"
-import { toast } from "../../../../hooks/use-toast"
+import { toast } from "react-toastify"
 
 const ReviewDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const { currentReview: review, loading, error } = useSelector((state) => state.reviews)
+  const { currentReview: review, isLoading, error } = useSelector((state) => state.reviews)
   const { user } = useSelector((state) => state.auth)
 
   const [feedback, setFeedback] = useState("")
@@ -44,7 +44,7 @@ const ReviewDetailPage = () => {
 
   useEffect(() => {
     if (review) {
-      setFeedback(review.teacherFeedback || "")
+      setFeedback(review.feedback?.comments || "")
     }
   }, [review])
 
@@ -59,16 +59,9 @@ const ReviewDetailPage = () => {
       ).unwrap()
 
       setIsEditing(false)
-      toast({
-        title: "Retroalimentación guardada",
-        description: "La retroalimentación ha sido guardada correctamente.",
-      })
+      toast.success("Retroalimentación guardada correctamente")
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudo guardar la retroalimentación.",
-        variant: "destructive",
-      })
+      toast.error("No se pudo guardar la retroalimentación")
     }
   }
 
@@ -95,16 +88,16 @@ const ReviewDetailPage = () => {
 
   const downloadReport = () => {
     const reportData = {
-      document: review.document.title,
-      analysis: review.analysis,
-      suggestions: review.suggestions,
+      document: review.documentId?.title || "Documento",
+      scores: review.scores,
+      issues: review.issues,
       plagiarismCheck: review.plagiarismCheck,
       date: new Date(review.createdAt).toLocaleDateString(),
     }
 
     const dataStr = JSON.stringify(reportData, null, 2)
     const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
-    const exportFileDefaultName = `reporte-${review.document.title}-${new Date().toISOString().split("T")[0]}.json`
+    const exportFileDefaultName = `reporte-${review.documentId?.title || "documento"}-${new Date().toISOString().split("T")[0]}.json`
 
     const linkElement = document.createElement("a")
     linkElement.setAttribute("href", dataUri)
@@ -112,7 +105,7 @@ const ReviewDetailPage = () => {
     linkElement.click()
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
@@ -137,11 +130,11 @@ const ReviewDetailPage = () => {
       {/* Header */}
       <div className="flex justify-between items-start mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Revisión: {review.document.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Revisión: {review.documentId?.title || "Documento"}</h1>
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <div className="flex items-center">
               <User className="w-4 h-4 mr-1" />
-              {review.document.author}
+              {review.documentId?.author || "Autor desconocido"}
             </div>
             <div className="flex items-center">
               <Calendar className="w-4 h-4 mr-1" />
@@ -183,26 +176,26 @@ const ReviewDetailPage = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.overallScore || 0)}`}>
-                {review.analysis?.overallScore || 0}%
+              <div className={`text-3xl font-bold ${getScoreColor(review.overallScore || 0)}`}>
+                {review.overallScore || 0}%
               </div>
               <p className="text-sm text-gray-600">Puntuación Total</p>
             </div>
             <div className="text-center">
-              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.grammarScore || 0)}`}>
-                {review.analysis?.grammarScore || 0}%
+              <div className={`text-3xl font-bold ${getScoreColor(review.scores?.grammar || 0)}`}>
+                {review.scores?.grammar || 0}%
               </div>
               <p className="text-sm text-gray-600">Gramática</p>
             </div>
             <div className="text-center">
-              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.coherenceScore || 0)}`}>
-                {review.analysis?.coherenceScore || 0}%
+              <div className={`text-3xl font-bold ${getScoreColor(review.scores?.coherence || 0)}`}>
+                {review.scores?.coherence || 0}%
               </div>
               <p className="text-sm text-gray-600">Coherencia</p>
             </div>
             <div className="text-center">
-              <div className={`text-3xl font-bold ${getScoreColor(review.analysis?.styleScore || 0)}`}>
-                {review.analysis?.styleScore || 0}%
+              <div className={`text-3xl font-bold ${getScoreColor(review.scores?.style || 0)}`}>
+                {review.scores?.style || 0}%
               </div>
               <p className="text-sm text-gray-600">Estilo</p>
             </div>
@@ -220,9 +213,9 @@ const ReviewDetailPage = () => {
             <AlertTriangle className="w-4 h-4 mr-2" />
             Plagio
           </TabsTrigger>
-          <TabsTrigger value="suggestions">
+          <TabsTrigger value="issues">
             <Target className="w-4 h-4 mr-2" />
-            Sugerencias
+            Problemas
           </TabsTrigger>
           <TabsTrigger value="feedback">
             <MessageSquare className="w-4 h-4 mr-2" />
@@ -239,25 +232,11 @@ const ReviewDetailPage = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>Errores encontrados</span>
-                    <span className="font-semibold">{review.analysis?.grammarErrors?.length || 0}</span>
+                    <span>Puntuación</span>
+                    <span className="font-semibold">{review.scores?.grammar || 0}%</span>
                   </div>
-                  <Progress value={review.analysis?.grammarScore || 0} className="h-2" />
+                  <Progress value={review.scores?.grammar || 0} className="h-2" />
                 </div>
-
-                {review.analysis?.grammarErrors?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Errores principales:</h4>
-                    <ul className="space-y-1">
-                      {review.analysis.grammarErrors.slice(0, 5).map((error, index) => (
-                        <li key={index} className="text-sm text-red-600 flex items-start">
-                          <AlertTriangle className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
-                          {error.message}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
@@ -269,27 +248,9 @@ const ReviewDetailPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Puntuación de coherencia</span>
-                    <span className="font-semibold">{review.analysis?.coherenceScore || 0}%</span>
+                    <span className="font-semibold">{review.scores?.coherence || 0}%</span>
                   </div>
-                  <Progress value={review.analysis?.coherenceScore || 0} className="h-2" />
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="font-medium">Aspectos evaluados:</h4>
-                  <ul className="space-y-1 text-sm">
-                    <li className="flex items-center">
-                      <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
-                      Estructura del documento
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
-                      Transiciones entre párrafos
-                    </li>
-                    <li className="flex items-center">
-                      <CheckCircle className="w-3 h-3 mr-2 text-green-500" />
-                      Flujo de ideas
-                    </li>
-                  </ul>
+                  <Progress value={review.scores?.coherence || 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -302,28 +263,9 @@ const ReviewDetailPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Puntuación de estilo</span>
-                    <span className="font-semibold">{review.analysis?.styleScore || 0}%</span>
+                    <span className="font-semibold">{review.scores?.style || 0}%</span>
                   </div>
-                  <Progress value={review.analysis?.styleScore || 0} className="h-2" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">Palabras:</span>
-                    <span className="ml-2 font-semibold">{review.analysis?.wordCount || 0}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Párrafos:</span>
-                    <span className="ml-2 font-semibold">{review.analysis?.paragraphCount || 0}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Legibilidad:</span>
-                    <span className="ml-2 font-semibold">{review.analysis?.readabilityScore || 0}%</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Complejidad:</span>
-                    <span className="ml-2 font-semibold">{review.analysis?.complexityLevel || "Media"}</span>
-                  </div>
+                  <Progress value={review.scores?.style || 0} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -335,28 +277,11 @@ const ReviewDetailPage = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>Citas encontradas</span>
-                    <span className="font-semibold">{review.analysis?.citationCount || 0}</span>
+                    <span>Puntuación de citas</span>
+                    <span className="font-semibold">{review.scores?.citation || 0}%</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Formato correcto</span>
-                    <span className="font-semibold">{review.analysis?.correctCitations || 0}</span>
-                  </div>
+                  <Progress value={review.scores?.citation || 0} className="h-2" />
                 </div>
-
-                {review.analysis?.citationIssues?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Problemas encontrados:</h4>
-                    <ul className="space-y-1">
-                      {review.analysis.citationIssues.slice(0, 3).map((issue, index) => (
-                        <li key={index} className="text-sm text-yellow-600 flex items-start">
-                          <AlertTriangle className="w-3 h-3 mr-1 mt-0.5 flex-shrink-0" />
-                          {issue}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -375,31 +300,31 @@ const ReviewDetailPage = () => {
               <div className="text-center">
                 <div
                   className={`text-4xl font-bold mb-2 ${
-                    (review.plagiarismCheck?.similarityPercentage || 0) < 15
+                    (review.plagiarismCheck?.similarity || 0) < 15
                       ? "text-green-600"
-                      : (review.plagiarismCheck?.similarityPercentage || 0) < 30
+                      : (review.plagiarismCheck?.similarity || 0) < 30
                         ? "text-yellow-600"
                         : "text-red-600"
                   }`}
                 >
-                  {review.plagiarismCheck?.similarityPercentage || 0}%
+                  {review.plagiarismCheck?.similarity || 0}%
                 </div>
                 <p className="text-gray-600">Similitud detectada</p>
               </div>
 
-              {review.plagiarismCheck?.matches?.length > 0 && (
+              {review.plagiarismCheck?.sources?.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-4">Coincidencias encontradas:</h4>
+                  <h4 className="font-medium mb-4">Fuentes encontradas:</h4>
                   <div className="space-y-4">
-                    {review.plagiarismCheck.matches.map((match, index) => (
+                    {review.plagiarismCheck.sources.map((source, index) => (
                       <div key={index} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <h5 className="font-medium">{match.source}</h5>
-                          <Badge variant="outline">{match.percentage}% similar</Badge>
+                          <h5 className="font-medium">{source.title}</h5>
+                          <Badge variant="outline">{source.similarity}% similar</Badge>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{match.text}</p>
+                        <p className="text-sm text-gray-600 mb-2">{source.matchedText}</p>
                         <a
-                          href={match.url}
+                          href={source.url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 hover:underline"
@@ -412,7 +337,7 @@ const ReviewDetailPage = () => {
                 </div>
               )}
 
-              {(review.plagiarismCheck?.similarityPercentage || 0) === 0 && (
+              {(review.plagiarismCheck?.similarity || 0) === 0 && (
                 <div className="text-center py-8">
                   <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-green-600 mb-2">No se detectó plagio</h3>
@@ -423,35 +348,44 @@ const ReviewDetailPage = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="suggestions">
-          <div className="space-y-6">
-            {review.suggestions?.map((category, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    {category.category}
-                  </CardTitle>
-                  <CardDescription>{category.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {category.suggestions?.map((suggestion, suggestionIndex) => (
-                      <div key={suggestionIndex} className="border-l-4 border-blue-500 pl-4">
-                        <h4 className="font-medium mb-1">{suggestion.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{suggestion.description}</p>
-                        {suggestion.example && (
-                          <div className="bg-gray-50 p-3 rounded text-sm">
-                            <strong>Ejemplo:</strong> {suggestion.example}
-                          </div>
-                        )}
+        <TabsContent value="issues">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <AlertTriangle className="w-5 h-5 mr-2" />
+                Problemas Encontrados
+              </CardTitle>
+              <CardDescription>Total: {review.summary?.totalIssues || 0} problemas</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {review.issues && review.issues.length > 0 ? (
+                <div className="space-y-4">
+                  {review.issues.map((issue, index) => (
+                    <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+                      <div className="flex justify-between items-start mb-1">
+                        <h4 className="font-medium capitalize">{issue.type}</h4>
+                        <Badge variant={issue.severity === "critical" ? "destructive" : "secondary"}>
+                          {issue.severity}
+                        </Badge>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                      <p className="text-sm text-gray-600 mb-2">{issue.explanation}</p>
+                      <div className="bg-gray-50 p-2 rounded text-sm">
+                        <strong>Original:</strong> {issue.originalText}
+                      </div>
+                      <div className="bg-green-50 p-2 rounded text-sm mt-2">
+                        <strong>Sugerencia:</strong> {issue.suggestion}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <CheckCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p>No se encontraron problemas</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="feedback">
@@ -473,8 +407,8 @@ const ReviewDetailPage = () => {
                     rows={8}
                   />
                   <div className="flex gap-2">
-                    <Button onClick={handleSaveFeedback} disabled={loading}>
-                      {loading ? "Guardando..." : "Guardar Retroalimentación"}
+                    <Button onClick={handleSaveFeedback} disabled={isLoading}>
+                      {isLoading ? "Guardando..." : "Guardar Retroalimentación"}
                     </Button>
                     <Button variant="outline" onClick={() => setIsEditing(false)}>
                       Cancelar
@@ -483,9 +417,9 @@ const ReviewDetailPage = () => {
                 </div>
               ) : (
                 <div>
-                  {review.teacherFeedback ? (
+                  {review.feedback?.comments ? (
                     <div className="bg-blue-50 p-4 rounded-lg">
-                      <p className="whitespace-pre-wrap">{review.teacherFeedback}</p>
+                      <p className="whitespace-pre-wrap">{review.feedback.comments}</p>
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">

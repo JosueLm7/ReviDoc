@@ -14,7 +14,7 @@ import { Badge } from "../../../../components/ui/badge"
 import { Switch } from "../../../../components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
 import { User, Calendar, Shield, Bell, Palette, Loader2, Save, Key, Mail } from "lucide-react"
-import { toast } from "../../../../hooks/use-toast"
+import { toast } from "react-toastify"
 
 const ProfilePage = () => {
   const dispatch = useDispatch()
@@ -75,11 +75,7 @@ const ProfilePage = () => {
   // ✅ Manejo de errores global
   useEffect(() => {
     if (error && activeTab === "profile") {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      })
+      toast.error(error)
     }
   }, [error, activeTab])
 
@@ -87,19 +83,12 @@ const ProfilePage = () => {
   const handleProfileUpdate = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     try {
       await dispatch(updateProfile(profileData)).unwrap()
-      toast({
-        title: "✅ Perfil actualizado",
-        description: "Tu información ha sido actualizada correctamente.",
-      })
+      toast.success("Perfil actualizado correctamente")
     } catch (error) {
-      toast({
-        title: "❌ Error",
-        description: error || "No se pudo actualizar el perfil.",
-        variant: "destructive",
-      })
+      toast.error(error || "No se pudo actualizar el perfil")
     } finally {
       setIsSubmitting(false)
     }
@@ -108,27 +97,19 @@ const ProfilePage = () => {
   // ✅ Cambiar contraseña optimizado
   const handlePasswordChange = async (e) => {
     e.preventDefault()
-    
+
     if (passwordData.newPassword.length < 6) {
-      toast({
-        title: "❌ Contraseña muy corta",
-        description: "La contraseña debe tener al menos 6 caracteres.",
-        variant: "destructive",
-      })
+      toast.error("La contraseña debe tener al menos 6 caracteres")
       return
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast({
-        title: "❌ Las contraseñas no coinciden",
-        description: "Por favor, verifica que las contraseñas sean iguales.",
-        variant: "destructive",
-      })
+      toast.error("Las contraseñas no coinciden")
       return
     }
 
     setIsSubmitting(true)
-    
+
     try {
       await dispatch(
         changePassword({
@@ -143,16 +124,9 @@ const ProfilePage = () => {
         confirmPassword: "",
       })
 
-      toast({
-        title: "✅ Contraseña actualizada",
-        description: "Tu contraseña ha sido cambiada correctamente.",
-      })
+      toast.success("Contraseña actualizada correctamente")
     } catch (error) {
-      toast({
-        title: "❌ Error",
-        description: error || "No se pudo cambiar la contraseña.",
-        variant: "destructive",
-      })
+      toast.error(error || "No se pudo cambiar la contraseña")
     } finally {
       setIsSubmitting(false)
     }
@@ -161,19 +135,12 @@ const ProfilePage = () => {
   // ✅ Preferencias con debounce
   const handlePreferencesUpdate = useCallback(async () => {
     setLocalLoading(true)
-    
+
     try {
       await dispatch(updateProfile({ preferences })).unwrap()
-      toast({
-        title: "✅ Preferencias actualizadas",
-        description: "Tus preferencias han sido guardadas.",
-      })
+      toast.success("Preferencias actualizadas")
     } catch (error) {
-      toast({
-        title: "❌ Error",
-        description: error || "No se pudieron actualizar las preferencias.",
-        variant: "destructive",
-      })
+      toast.error(error || "No se pudieron actualizar las preferencias")
     } finally {
       setLocalLoading(false)
     }
@@ -255,7 +222,7 @@ const ProfilePage = () => {
                 {getInitials(user?.firstName, user?.lastName)}
               </AvatarFallback>
             </Avatar>
-            
+
             <div className="flex-1 text-center sm:text-left">
               <h2 className="text-2xl font-bold text-foreground">
                 {user?.firstName} {user?.lastName}
@@ -264,12 +231,12 @@ const ProfilePage = () => {
                 <Mail className="w-4 h-4" />
                 {user?.email}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row items-center gap-3 mt-3">
                 <Badge variant="secondary" className={getRoleColor(user?.role)}>
                   {getRoleLabel(user?.role)}
                 </Badge>
-                
+
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4 mr-1" />
                   Miembro desde {new Date(user?.createdAt).toLocaleDateString("es-ES")}
@@ -321,7 +288,7 @@ const ProfilePage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Apellido *</Label>
                     <Input
@@ -346,7 +313,7 @@ const ProfilePage = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="phone">Teléfono</Label>
                     <Input
@@ -369,9 +336,7 @@ const ProfilePage = () => {
                     rows={4}
                     className="resize-none"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {profileData.bio.length}/500 caracteres
-                  </p>
+                  <p className="text-xs text-muted-foreground">{profileData.bio.length}/500 caracteres</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,7 +349,7 @@ const ProfilePage = () => {
                       placeholder="Universidad o institución"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="department">Departamento</Label>
                     <Input
@@ -407,25 +372,17 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="flex gap-3 pt-4">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isSubmitting || !isProfileModified()}
                     className="flex items-center gap-2"
                   >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     {isSubmitting ? "Actualizando..." : "Actualizar Perfil"}
                   </Button>
-                  
+
                   {isProfileModified() && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => window.location.reload()}
-                    >
+                    <Button type="button" variant="outline" onClick={() => window.location.reload()}>
                       Cancelar
                     </Button>
                   )}
@@ -470,9 +427,7 @@ const ProfilePage = () => {
                     required
                     minLength={6}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    La contraseña debe tener al menos 6 caracteres
-                  </p>
+                  <p className="text-xs text-muted-foreground">La contraseña debe tener al menos 6 caracteres</p>
                 </div>
 
                 <div className="space-y-2">
@@ -488,25 +443,16 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="flex gap-3 pt-2">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isSubmitting || !passwordData.currentPassword || !passwordData.newPassword}
                     className="flex items-center gap-2"
                   >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Key className="w-4 h-4" />
-                    )}
+                    {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Key className="w-4 h-4" />}
                     {isSubmitting ? "Cambiando..." : "Cambiar Contraseña"}
                   </Button>
-                  
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={resetPasswordForm}
-                    disabled={isSubmitting}
-                  >
+
+                  <Button type="button" variant="outline" onClick={resetPasswordForm} disabled={isSubmitting}>
                     Limpiar
                   </Button>
                 </div>
@@ -550,23 +496,13 @@ const ProfilePage = () => {
                   </div>
                   <Switch
                     checked={item.checked}
-                    onCheckedChange={(checked) =>
-                      setPreferences({ ...preferences, [item.id]: checked })
-                    }
+                    onCheckedChange={(checked) => setPreferences({ ...preferences, [item.id]: checked })}
                   />
                 </div>
               ))}
 
-              <Button 
-                onClick={handlePreferencesUpdate} 
-                disabled={localLoading}
-                className="flex items-center gap-2"
-              >
-                {localLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
+              <Button onClick={handlePreferencesUpdate} disabled={localLoading} className="flex items-center gap-2">
+                {localLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {localLoading ? "Guardando..." : "Guardar Preferencias"}
               </Button>
             </CardContent>
@@ -616,16 +552,8 @@ const ProfilePage = () => {
                 </Select>
               </div>
 
-              <Button 
-                onClick={handlePreferencesUpdate} 
-                disabled={localLoading}
-                className="flex items-center gap-2"
-              >
-                {localLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
+              <Button onClick={handlePreferencesUpdate} disabled={localLoading} className="flex items-center gap-2">
+                {localLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {localLoading ? "Guardando..." : "Guardar Preferencias"}
               </Button>
             </CardContent>

@@ -3,21 +3,23 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from "react-redux"
-import { 
-  DocumentTextIcon, 
-  PencilIcon, 
-  CloudArrowDownIcon, 
+import {
+  DocumentTextIcon,
+  PencilIcon,
+  CloudArrowDownIcon,
   SparklesIcon,
   ArrowLeftIcon,
   CalendarDaysIcon,
   UserIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline"
-import { fetchDocumentById } from "../../store/slices/documentsSlice"
+import { fetchDocumentById, createReview } from "../../store/slices/documentsSlice"
 import { Tab } from "@headlessui/react"
+import { toast } from "react-toastify"
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ")
 }
 
 function DocumentViewPage() {
@@ -28,8 +30,10 @@ function DocumentViewPage() {
   const { currentDocument, isLoading, error } = useSelector((state) => state.documents)
   const { user } = useSelector((state) => state.auth || {})
   const [selectedTab, setSelectedTab] = useState(0)
-
   const [showReviews, setShowReviews] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [analysisCompleted, setAnalysisCompleted] = useState(false)
+  const [latestReviewId, setLatestReviewId] = useState(null)
 
   useEffect(() => {
     console.log("🔄 Buscando documento con ID:", id)
@@ -38,16 +42,40 @@ function DocumentViewPage() {
     }
   }, [id, dispatch])
 
-  // Debug
+  // Verificar si el documento ya tiene análisis completado
   useEffect(() => {
-    console.log("📊 currentDocument:", currentDocument)
-    console.log("❌ Error:", error)
-    console.log("👤 User:", user)
-  }, [currentDocument, error, user])
+    if (currentDocument) {
+      const documentData = getDocumentData()
+      // Verificar si existe alguna revisión completada
+      const hasCompletedReview = documentData?.reviews && 
+        Array.isArray(documentData.reviews) && 
+        documentData.reviews.length > 0
+      
+      setAnalysisCompleted(hasCompletedReview)
+
+      // Obtener el ID de la última revisión
+      if (hasCompletedReview) {
+        const latestReview = documentData.reviews[documentData.reviews.length - 1]
+        setLatestReviewId(latestReview._id || latestReview.id)
+        console.log("📋 ID de la última revisión:", latestReview._id || latestReview.id)
+      }
+      
+      // Debug de las revisiones
+      if (documentData?.reviews) {
+        console.log("📋 Revisiones del documento:", documentData.reviews)
+        documentData.reviews.forEach((review, index) => {
+          console.log(`📖 Revisión ${index}:`, review)
+          if (review.summary && typeof review.summary === 'object') {
+            console.log(`⚠️ Revisión ${index} summary es un objeto:`, review.summary)
+          }
+        })
+      }
+    }
+  }, [currentDocument])
 
   const getDocumentData = () => {
     if (!currentDocument) return null
-    
+
     // Diferentes estructuras que puede tener la respuesta
     if (currentDocument.data?.document) {
       console.log("📁 Estructura: currentDocument.data.document")
@@ -70,22 +98,102 @@ function DocumentViewPage() {
   const handleExport = () => {
     if (!documentData) return
 
-    // Si tenemos URL del archivo original, usarla
     if (documentData.fileUrl) {
-      window.open(`${process.env.REACT_APP_API_URL}${documentData.fileUrl}`, '_blank')
+      const fileUrl = documentData.fileUrl.startsWith("http")
+        ? documentData.fileUrl
+        : `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${documentData.fileUrl}`
+
+      window.open(fileUrl, "_blank")
       return
     }
 
     // Fallback: exportar como texto
     const element = document.createElement("a")
-    const file = new Blob([documentData.content || "Sin contenido"], { 
-      type: "text/plain" 
+    const file = new Blob([documentData.content || "Sin contenido"], {
+      type: "text/plain",
     })
     element.href = URL.createObjectURL(file)
-    element.download = `${documentData.title || 'documento'}.txt`
+    element.download = `${documentData.title || "documento"}.txt`
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
+  }
+
+  const handleAIAnalysis = async () => {
+    // Si ya tiene análisis completado, redirigir a la página de revisiones
+    if (analysisCompleted && latestReviewId) {
+      navigate(`/app/reviews/${latestReviewId}`)
+      return
+    }
+
+    // Si no tiene análisis, iniciar uno nuevo
+    try {
+      console.log("[v0] Iniciando análisis IA para documento:", id)
+      setUploading(true)
+
+      const result = await dispatch(createReview(id)).unwrap()
+
+      console.log("[v0] Análisis IA iniciado:", result)
+
+      toast.success("Revisando... Redirigiendo a documentos...")
+
+      // Esperar un momento para mostrar el mensaje y luego redirigir
+      setTimeout(() => {
+        navigate("/app/documents")
+      }, 2000)
+
+    } catch (error) {
+      console.error("Error en análisis IA:", error)
+      toast.error(error?.message || error?.toString() || "Error al iniciar el análisis IA")
+      setUploading(false)
+    }
+  }
+
+  const handleViewAnalysis = () => {
+    if (latestReviewId) {
+      navigate(`/app/reviews/${latestReviewId}`)
+    } else {
+      toast.error("No se pudo encontrar el ID del análisis")
+    }
+  }
+
+  // Función para formatear el resumen de la revisión
+  const formatReviewSummary = (summary) => {
+    if (!summary) return "Análisis completado"
+    
+    // Si el summary es un string, devolverlo directamente
+    if (typeof summary === 'string') {
+      return summary
+    }
+    
+    // Si es un objeto, convertirlo a string legible
+    if (typeof summary === 'object') {
+      try {
+        // Si el objeto tiene propiedades específicas, crear un resumen más legible
+        if (summary.totalIssues !== undefined || summary.criticalIssues !== undefined) {
+          let readableSummary = ""
+          if (summary.totalIssues !== undefined) {
+            readableSummary += `Problemas totales: ${summary.totalIssues}\n`
+          }
+          if (summary.criticalIssues !== undefined) {
+            readableSummary += `Problemas críticos: ${summary.criticalIssues}\n`
+          }
+          if (summary.improvementSuggestions !== undefined) {
+            readableSummary += `Sugerencias: ${summary.improvementSuggestions}\n`
+          }
+          if (summary.resolvedIssues !== undefined) {
+            readableSummary += `Problemas resueltos: ${summary.resolvedIssues}`
+          }
+          return readableSummary.trim()
+        }
+        
+        return JSON.stringify(summary, null, 2)
+      } catch (e) {
+        return "Resumen de análisis disponible"
+      }
+    }
+    
+    return "Análisis completado"
   }
 
   const getStatusColor = (status) => {
@@ -116,24 +224,31 @@ function DocumentViewPage() {
 
   const formatDate = (dateString) => {
     if (!dateString) return "Fecha desconocida"
-    const date = new Date(dateString)
-    return date.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    } catch (e) {
+      return "Fecha inválida"
+    }
   }
 
   const countWords = (text) => {
     if (!text) return 0
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length
   }
 
   const countParagraphs = (text) => {
     if (!text) return 0
-    return text.split('\n').filter(paragraph => paragraph.trim().length > 0).length
+    return text.split("\n").filter((paragraph) => paragraph.trim().length > 0).length
   }
 
   if (isLoading) {
@@ -153,7 +268,7 @@ function DocumentViewPage() {
         <div className="text-center max-w-md mx-auto p-8">
           <DocumentTextIcon className="w-20 h-20 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Error al cargar documento</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 mb-4">{error?.toString() || "Error desconocido"}</p>
           <p className="text-sm text-gray-500 mb-6">ID: {id}</p>
           <button
             onClick={() => navigate("/app/documents")}
@@ -172,9 +287,7 @@ function DocumentViewPage() {
         <div className="text-center max-w-md mx-auto p-8">
           <DocumentTextIcon className="w-20 h-20 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Documento no encontrado</h2>
-          <p className="text-gray-600 mb-4">
-            El documento que buscas no existe o no tienes permisos para verlo.
-          </p>
+          <p className="text-gray-600 mb-4">El documento que buscas no existe o no tienes permisos para verlo.</p>
           <p className="text-sm text-gray-500 mb-6">ID: {id}</p>
           <button
             onClick={() => navigate("/app/documents")}
@@ -203,7 +316,7 @@ function DocumentViewPage() {
                   <span>Volver a documentos</span>
                 </button>
               </div>
-              
+
               <div className="flex items-start space-x-4">
                 <div className="p-3 bg-blue-100 rounded-xl">
                   <DocumentTextIcon className="w-8 h-8 text-blue-600" />
@@ -213,7 +326,9 @@ function DocumentViewPage() {
                     {documentData.title || "Documento sin título"}
                   </h1>
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-semibold border ${getStatusColor(documentData.status)}`}>
+                    <span
+                      className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-semibold border ${getStatusColor(documentData.status)}`}
+                    >
                       <span>{getStatusText(documentData.status)}</span>
                     </span>
                     <span className="flex items-center space-x-1 text-sm text-gray-600">
@@ -226,13 +341,25 @@ function DocumentViewPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => setShowReviews(!showReviews)}
-                className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg"
-              >
-                <SparklesIcon className="w-5 h-5" />
-                <span>Análisis IA</span>
-              </button>
+              {/* Botón de Análisis IA / Ver Análisis */}
+              {analysisCompleted ? (
+                <button
+                  onClick={handleViewAnalysis}
+                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg"
+                >
+                  <EyeIcon className="w-5 h-5" />
+                  <span>Ver Análisis</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleAIAnalysis}
+                  disabled={uploading}
+                  className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg disabled:opacity-50"
+                >
+                  <SparklesIcon className="w-5 h-5" />
+                  <span>{uploading ? "Revisando..." : "Análisis IA"}</span>
+                </button>
+              )}
 
               <button
                 onClick={handleExport}
@@ -264,12 +391,12 @@ function DocumentViewPage() {
               {/* Content Header */}
               <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
                 <Tab.List className="flex space-x-2 border-b px-8 pt-6 bg-gray-50/50">
-                  {documentData.fileType === 'pdf' && documentData.fileUrl && (
+                  {documentData.fileType === "pdf" && documentData.fileUrl && (
                     <Tab
                       className={({ selected }) =>
                         classNames(
-                          'px-4 py-2 font-semibold rounded-t-lg focus:outline-none',
-                          selected ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                          "px-4 py-2 font-semibold rounded-t-lg focus:outline-none",
+                          selected ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100",
                         )
                       }
                     >
@@ -279,8 +406,8 @@ function DocumentViewPage() {
                   <Tab
                     className={({ selected }) =>
                       classNames(
-                        'px-4 py-2 font-semibold rounded-t-lg focus:outline-none',
-                        selected ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                        "px-4 py-2 font-semibold rounded-t-lg focus:outline-none",
+                        selected ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100",
                       )
                     }
                   >
@@ -289,16 +416,17 @@ function DocumentViewPage() {
                 </Tab.List>
                 <Tab.Panels>
                   {/* PDF Panel */}
-                  {documentData.fileType === 'pdf' && documentData.fileUrl && (
+                  {documentData.fileType === "pdf" && documentData.fileUrl && (
                     <Tab.Panel className="px-8 py-6">
-                      <div className="w-full h-96">
+                      <div className="w-full h-[600px] bg-gray-100 rounded-lg overflow-hidden">
                         <iframe
-                          src={documentData.fileUrl.startsWith("http") ? documentData.fileUrl : `${process.env.REACT_APP_API_URL}${documentData.fileUrl}`}
-                          className="w-full h-full border rounded-lg"
+                          src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/documents/file/${documentData.fileUrl.split("/").pop()}`}
+                          className="w-full h-full border-0"
                           title={`PDF: ${documentData.title}`}
+                          type="application/pdf"
                         />
                       </div>
-                      <p className="text-sm text-gray-500 mt-2 text-center">
+                      <p className="text-sm text-gray-500 mt-4 text-center">
                         Vista previa del PDF. Usa el botón "Exportar" para descargar el archivo original.
                       </p>
                     </Tab.Panel>
@@ -306,8 +434,10 @@ function DocumentViewPage() {
                   {/* Texto Panel */}
                   <Tab.Panel className="px-8 py-6">
                     <div className="prose prose-lg max-w-none">
-                      <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg font-light"
-                        style={{ fontFamily: "Source Sans Pro, sans-serif", lineHeight: '1.8' }}>
+                      <div
+                        className="whitespace-pre-wrap text-gray-700 leading-relaxed text-lg font-light"
+                        style={{ fontFamily: "Source Sans Pro, sans-serif", lineHeight: "1.8" }}
+                      >
                         {documentData.content || "Este documento no tiene contenido."}
                       </div>
                     </div>
@@ -361,14 +491,12 @@ function DocumentViewPage() {
                     <p className="font-medium text-gray-900">{formatDate(documentData.createdAt)}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 py-2 border-b border-gray-100">
                   <UserIcon className="w-4 h-4 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-600">Autor</p>
-                    <p className="font-medium text-gray-900">
-                      {documentData.userId?.name || user?.name || "Usuario"}
-                    </p>
+                    <p className="font-medium text-gray-900">{documentData.userId?.name || user?.name || "Usuario"}</p>
                   </div>
                 </div>
 
@@ -396,16 +524,14 @@ function DocumentViewPage() {
                 {documentData.fileSize && (
                   <div className="py-2">
                     <p className="text-sm text-gray-600">Tamaño del archivo</p>
-                    <p className="font-medium text-gray-900">
-                      {(documentData.fileSize / 1024 / 1024).toFixed(2)} MB
-                    </p>
+                    <p className="font-medium text-gray-900">{(documentData.fileSize / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
                 )}
               </div>
             </div>
 
             {/* AI Reviews */}
-            {showReviews && documentData.reviews && documentData.reviews.length > 0 && (
+            {analysisCompleted && documentData.reviews && documentData.reviews.length > 0 && (
               <div className="bg-white rounded-2xl border border-gray-200/60 p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center space-x-2">
                   <SparklesIcon className="w-5 h-5" />
@@ -413,7 +539,7 @@ function DocumentViewPage() {
                 </h3>
                 <div className="space-y-4">
                   {documentData.reviews.slice(0, 3).map((review, index) => (
-                    <div key={index} className="border-l-4 border-purple-500 pl-4 py-2">
+                    <div key={review._id || index} className="border-l-4 border-purple-500 pl-4 py-2">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-semibold text-gray-900 capitalize">
                           {review.type || "general"}
@@ -422,8 +548,8 @@ function DocumentViewPage() {
                           {review.createdAt ? formatDate(review.createdAt) : "Fecha desconocida"}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {review.summary || "Análisis completado"}
+                      <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                        {formatReviewSummary(review.summary)}
                       </p>
                       {review.score && (
                         <div className="mt-2 flex items-center space-x-2">
@@ -433,6 +559,12 @@ function DocumentViewPage() {
                       )}
                     </div>
                   ))}
+                  <button
+                    onClick={handleViewAnalysis}
+                    className="w-full mt-4 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors font-medium"
+                  >
+                    Ver análisis completo
+                  </button>
                 </div>
               </div>
             )}

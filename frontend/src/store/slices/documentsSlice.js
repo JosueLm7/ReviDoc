@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { documentsAPI } from "../../services/api"
+import { documentsAPI, reviewsAPI } from "../../services/api"
 
 // Async thunks
 export const fetchDocuments = createAsyncThunk("documents/fetchDocuments", async (params = {}, { rejectWithValue }) => {
@@ -11,34 +11,32 @@ export const fetchDocuments = createAsyncThunk("documents/fetchDocuments", async
   }
 })
 
-export const uploadDocument = createAsyncThunk(
-  "documents/uploadDocument", 
-  async (formData, { rejectWithValue }) => {
-    try {
-      console.log("🔵 Iniciando upload en thunk...")
-      const response = await documentsAPI.uploadDocument(formData)
-      console.log("✅ Upload exitoso en thunk:", response.data)
-      return response.data
-    } catch (error) {
-      console.error("❌ Error completo en uploadDocument thunk:", error)
-      
-      let errorMessage = "Error desconocido al subir el documento"
-      
-      if (error.response) {
-        errorMessage = error.response.data?.message || 
-                      error.response.data?.error ||
-                      `Error ${error.response.status}: ${error.response.statusText}`
-      } else if (error.request) {
-        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión."
-      } else {
-        errorMessage = error.message || "Error de configuración"
-      }
-      
-      console.error("📝 Mensaje de error final:", errorMessage)
-      return rejectWithValue(errorMessage)
+export const uploadDocument = createAsyncThunk("documents/uploadDocument", async (formData, { rejectWithValue }) => {
+  try {
+    console.log("🔵 Iniciando upload en thunk...")
+    const response = await documentsAPI.uploadDocument(formData)
+    console.log("✅ Upload exitoso en thunk:", response.data)
+    return response.data
+  } catch (error) {
+    console.error("❌ Error completo en uploadDocument thunk:", error)
+
+    let errorMessage = "Error desconocido al subir el documento"
+
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        `Error ${error.response.status}: ${error.response.statusText}`
+    } else if (error.request) {
+      errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión."
+    } else {
+      errorMessage = error.message || "Error de configuración"
     }
+
+    console.error("📝 Mensaje de error final:", errorMessage)
+    return rejectWithValue(errorMessage)
   }
-)
+})
 
 export const fetchDocumentById = createAsyncThunk("documents/fetchDocumentById", async (id, { rejectWithValue }) => {
   try {
@@ -67,6 +65,18 @@ export const deleteDocument = createAsyncThunk("documents/deleteDocument", async
     return id
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Error deleting document")
+  }
+})
+
+export const createReview = createAsyncThunk("documents/createReview", async (documentId, { rejectWithValue }) => {
+  try {
+    console.log("[v0] Creando review para documento:", documentId)
+    const response = await reviewsAPI.createReview(documentId)
+    console.log("[v0] Review creada:", response.data)
+    return response.data
+  } catch (error) {
+    console.error("[v0] Error creando review:", error)
+    return rejectWithValue(error.response?.data?.message || "Error creating review")
   }
 })
 
@@ -144,8 +154,8 @@ const documentsSlice = createSlice({
       })
       .addCase(fetchDocumentById.fulfilled, (state, action) => {
         state.isLoading = false
-        // El backend envía { data: { document } } no { document }
-        state.currentDocument = action.payload.data?.document || action.payload
+        state.error = null
+        state.currentDocument = action.payload
       })
       .addCase(fetchDocumentById.rejected, (state, action) => {
         state.isLoading = false
@@ -153,23 +163,53 @@ const documentsSlice = createSlice({
       })
 
       // Update document
+      .addCase(updateDocument.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
       .addCase(updateDocument.fulfilled, (state, action) => {
-        const updatedDoc = action.payload.document
-        const index = state.documents.findIndex((doc) => doc._id === updatedDoc._id)
+        state.isLoading = false
+        state.error = null
+        const index = state.documents.findIndex((doc) => doc.id === action.payload.id)
         if (index !== -1) {
-          state.documents[index] = updatedDoc
+          state.documents[index] = action.payload
         }
-        if (state.currentDocument?._id === updatedDoc._id) {
-          state.currentDocument = updatedDoc
-        }
+      })
+      .addCase(updateDocument.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
       })
 
       // Delete document
+      .addCase(deleteDocument.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
       .addCase(deleteDocument.fulfilled, (state, action) => {
-        state.documents = state.documents.filter((doc) => doc._id !== action.payload)
-        if (state.currentDocument?._id === action.payload) {
-          state.currentDocument = null
+        state.isLoading = false
+        state.error = null
+        state.documents = state.documents.filter((doc) => doc.id !== action.payload)
+      })
+      .addCase(deleteDocument.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
+      })
+
+      // Create review
+      .addCase(createReview.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(createReview.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.error = null
+        if (state.currentDocument) {
+          state.currentDocument.reviews = [...(state.currentDocument.reviews || []), action.payload]
         }
+      })
+      .addCase(createReview.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
       })
   },
 })

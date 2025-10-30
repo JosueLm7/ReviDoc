@@ -15,7 +15,6 @@ import {
   ClockIcon,
   ChartBarIcon,
   DocumentChartBarIcon,
-  UserIcon,
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline"
 import { fetchDocuments, deleteDocument } from "../../store/slices/documentsSlice"
@@ -39,22 +38,24 @@ function DocumentsPage() {
         console.error("❌ Error cargando documentos:", error)
       }
     }
-    
+
     loadDocuments()
   }, [dispatch])
 
   const filteredDocuments = (documents || [])
     .filter((doc) => {
-      const matchesSearch = doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           doc.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           doc.subject?.toLowerCase().includes(searchTerm.toLowerCase()) || false
+      const matchesSearch =
+        doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        false
       const matchesFilter = filterStatus === "all" || doc.status === filterStatus
       return matchesSearch && matchesFilter
     })
     .sort((a, b) => {
       switch (sortBy) {
         case "title":
-          return (a.title || '').localeCompare(b.title || '')
+          return (a.title || "").localeCompare(b.title || "")
         case "created":
           return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
         case "updated":
@@ -139,19 +140,17 @@ function DocumentsPage() {
   const formatDate = (dateString) => {
     if (!dateString) return "Fecha desconocida"
     const date = new Date(dateString)
-    return date.toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     })
   }
 
   const getPreviewText = (content, maxLength = 120) => {
     if (!content) return "Sin contenido disponible para previsualización..."
-    const cleanContent = content.replace(/[#*`]/g, '').trim()
-    return cleanContent.length > maxLength 
-      ? cleanContent.substring(0, maxLength) + '...' 
-      : cleanContent
+    const cleanContent = content.replace(/[#*`]/g, "").trim()
+    return cleanContent.length > maxLength ? cleanContent.substring(0, maxLength) + "..." : cleanContent
   }
 
   if (isLoading) {
@@ -318,7 +317,9 @@ function DocumentsPage() {
 
                   {/* Estado y badges */}
                   <div className="flex flex-wrap gap-2">
-                    <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(document.status)}`}>
+                    <span
+                      className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(document.status)}`}
+                    >
                       <span>{getStatusIcon(document.status)}</span>
                       <span>{getStatusText(document.status)}</span>
                     </span>

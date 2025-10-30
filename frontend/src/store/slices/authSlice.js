@@ -1,55 +1,45 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { authAPI, profileAPI } from '../../services/api' // ✅ Importa desde tu archivo de API
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
+import { authAPI, profileAPI } from "../../services/api"
 
-// Thunk para actualizar perfil
-export const updateProfile = createAsyncThunk(
-  'auth/updateProfile',
-  async (profileData, { rejectWithValue }) => {
-    try {
-      const response = await profileAPI.updateProfile(profileData)
-      return response.data.user // Ajusta según la respuesta de tu API
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al actualizar perfil'
-      )
-    }
+export const fetchCurrentUser = createAsyncThunk("auth/fetchCurrentUser", async (_, { rejectWithValue }) => {
+  try {
+    const response = await authAPI.getCurrentUser()
+    return response.data.data.user
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Error fetching user")
   }
-)
+})
 
-// Thunk para cambiar contraseña
-export const changePassword = createAsyncThunk(
-  'auth/changePassword',
-  async (passwordData, { rejectWithValue }) => {
-    try {
-      const response = await profileAPI.changePassword(passwordData)
-      return response.data.message // Ajusta según la respuesta de tu API
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al cambiar contraseña'
-      )
-    }
+export const updateProfile = createAsyncThunk("auth/updateProfile", async (profileData, { rejectWithValue }) => {
+  try {
+    const response = await profileAPI.updateProfile(profileData)
+    return response.data.data?.user || response.data.user
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Error al actualizar perfil")
   }
-)
+})
 
-// Thunk para login (ya lo tenías, pero lo mantengo como ejemplo)
-export const loginUser = createAsyncThunk(
-  'auth/login',
-  async (credentials, { rejectWithValue }) => {
-    try {
-      const response = await authAPI.login(credentials)
-      const { user, token } = response.data
-      
-      // Guardar token en localStorage
-      localStorage.setItem("token", token)
-      
-      return { user, token }
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al iniciar sesión'
-      )
-    }
+export const changePassword = createAsyncThunk("auth/changePassword", async (passwordData, { rejectWithValue }) => {
+  try {
+    const response = await profileAPI.changePassword(passwordData)
+    return response.data.message
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Error al cambiar contraseña")
   }
-)
+})
+
+export const loginUser = createAsyncThunk("auth/login", async (credentials, { rejectWithValue }) => {
+  try {
+    const response = await authAPI.login(credentials)
+    const { user, token } = response.data.data
+
+    localStorage.setItem("token", token)
+
+    return { user, token }
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Error al iniciar sesión")
+  }
+})
 
 const initialState = {
   user: null,
@@ -60,7 +50,7 @@ const initialState = {
 }
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setCredentials: (state, action) => {
@@ -80,6 +70,20 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.user = action.payload
+        state.isAuthenticated = true
+      })
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
+        state.isAuthenticated = false
+      })
       // Update Profile cases
       .addCase(updateProfile.pending, (state) => {
         state.isLoading = true
@@ -94,7 +98,7 @@ const authSlice = createSlice({
         state.isLoading = false
         state.error = action.payload
       })
-      // Change Password cases  
+      // Change Password cases
       .addCase(changePassword.pending, (state) => {
         state.isLoading = true
         state.error = null
@@ -107,7 +111,7 @@ const authSlice = createSlice({
         state.isLoading = false
         state.error = action.payload
       })
-      // Login cases (ejemplo)
+      // Login cases
       .addCase(loginUser.fulfilled, (state, action) => {
         state.user = action.payload.user
         state.token = action.payload.token
@@ -115,13 +119,9 @@ const authSlice = createSlice({
         state.isLoading = false
         state.error = null
       })
-  }
+  },
 })
 
-export const { 
-  setCredentials, 
-  clearCredentials, 
-  setLoading 
-} = authSlice.actions
+export const { setCredentials, clearCredentials, setLoading } = authSlice.actions
 
 export default authSlice.reducer

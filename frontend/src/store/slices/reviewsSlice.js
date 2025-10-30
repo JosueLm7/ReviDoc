@@ -5,7 +5,7 @@ import { reviewsAPI } from "../../services/api"
 export const fetchReviews = createAsyncThunk("reviews/fetchReviews", async (params = {}, { rejectWithValue }) => {
   try {
     const response = await reviewsAPI.getReviews(params)
-    return response.data
+    return response.data.data
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Error fetching reviews")
   }
@@ -14,8 +14,10 @@ export const fetchReviews = createAsyncThunk("reviews/fetchReviews", async (para
 export const fetchReviewById = createAsyncThunk("reviews/fetchReviewById", async (id, { rejectWithValue }) => {
   try {
     const response = await reviewsAPI.getReviewById(id)
-    return response.data
+    console.log("[v0] fetchReviewById response:", response.data)
+    return response.data.data.review
   } catch (error) {
+    console.error("[v0] fetchReviewById error:", error)
     return rejectWithValue(error.response?.data?.message || "Error fetching review")
   }
 })
@@ -37,6 +39,27 @@ export const addFeedback = createAsyncThunk("reviews/addFeedback", async ({ id, 
     return rejectWithValue(error.response?.data?.message || "Error adding feedback")
   }
 })
+
+export const deleteReview = createAsyncThunk("reviews/deleteReview", async (id, { rejectWithValue }) => {
+  try {
+    await reviewsAPI.deleteReview(id)
+    return id
+  } catch (error) {
+    return rejectWithValue(error.response?.data?.message || "Error deleting review")
+  }
+})
+
+export const updateReview = createAsyncThunk(
+  "reviews/updateReview",
+  async ({ id, teacherFeedback, status }, { rejectWithValue }) => {
+    try {
+      const response = await reviewsAPI.addFeedback(id, { comments: teacherFeedback })
+      return response.data.data.review
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Error updating review")
+    }
+  },
+)
 
 const initialState = {
   reviews: [],
@@ -78,8 +101,8 @@ const reviewsSlice = createSlice({
       })
       .addCase(fetchReviews.fulfilled, (state, action) => {
         state.isLoading = false
-        state.reviews = action.payload.reviews
-        state.pagination = action.payload.pagination
+        state.reviews = action.payload.reviews || []
+        state.pagination = action.payload.pagination || {}
       })
       .addCase(fetchReviews.rejected, (state, action) => {
         state.isLoading = false
@@ -93,7 +116,7 @@ const reviewsSlice = createSlice({
       })
       .addCase(fetchReviewById.fulfilled, (state, action) => {
         state.isLoading = false
-        state.currentReview = action.payload.review
+        state.currentReview = action.payload
       })
       .addCase(fetchReviewById.rejected, (state, action) => {
         state.isLoading = false
@@ -101,8 +124,17 @@ const reviewsSlice = createSlice({
       })
 
       // Create review
+      .addCase(createReview.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
       .addCase(createReview.fulfilled, (state, action) => {
-        state.reviews.unshift(action.payload.review)
+        state.isLoading = false
+        state.reviews.unshift(action.payload.review || action.payload.data?.review)
+      })
+      .addCase(createReview.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
       })
 
       // Add feedback
@@ -114,6 +146,37 @@ const reviewsSlice = createSlice({
         if (state.currentReview?._id === action.payload.review._id) {
           state.currentReview = action.payload.review
         }
+      })
+
+      // Update review
+      .addCase(updateReview.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(updateReview.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.currentReview = action.payload
+      })
+      .addCase(updateReview.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
+      })
+
+      // Delete review
+      .addCase(deleteReview.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(deleteReview.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.reviews = state.reviews.filter((review) => review._id !== action.payload)
+        if (state.currentReview?._id === action.payload) {
+          state.currentReview = null
+        }
+      })
+      .addCase(deleteReview.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload
       })
   },
 })

@@ -21,14 +21,14 @@ import {
   Clock,
   Loader2,
 } from "lucide-react"
-import { toast } from "../../../../hooks/use-toast"
+import { toast } from "react-toastify"
 
 const ReviewsPage = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
   // ✅ Validaciones seguras para useSelector
-  const { reviews = [], loading = false, error = null, pagination = {} } = useSelector((state) => state.reviews || {})
+  const { reviews = [], isLoading = false, error = null, pagination = {} } = useSelector((state) => state.reviews || {})
   const { user = {} } = useSelector((state) => state.auth || {})
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -52,39 +52,24 @@ const ReviewsPage = () => {
 
   const handleViewReview = (reviewId) => {
     if (!reviewId) {
-      toast({
-        title: "Error",
-        description: "ID de revisión no válido",
-        variant: "destructive",
-      })
+      toast.error("ID de revisión no válido")
       return
     }
-    navigate(`/reviews/${reviewId}`)
+    navigate(`/app/reviews/${reviewId}`)
   }
 
   const handleDeleteReview = async (reviewId) => {
     if (!reviewId) {
-      toast({
-        title: "Error",
-        description: "ID de revisión no válido",
-        variant: "destructive",
-      })
+      toast.error("ID de revisión no válido")
       return
     }
 
     if (window.confirm("¿Estás seguro de que quieres eliminar esta revisión?")) {
       try {
         await dispatch(deleteReview(reviewId)).unwrap()
-        toast({
-          title: "Revisión eliminada",
-          description: "La revisión ha sido eliminada correctamente.",
-        })
+        toast.success("Revisión eliminada correctamente")
       } catch (error) {
-        toast({
-          title: "Error",
-          description: error?.message || "No se pudo eliminar la revisión.",
-          variant: "destructive",
-        })
+        toast.error(error?.message || "No se pudo eliminar la revisión")
       }
     }
   }
@@ -92,7 +77,7 @@ const ReviewsPage = () => {
   // ✅ Función segura para obtener color de estado
   const getStatusColor = (status) => {
     if (!status) return "bg-gray-100 text-gray-800"
-    
+
     switch (status) {
       case "completed":
         return "bg-green-100 text-green-800"
@@ -110,7 +95,7 @@ const ReviewsPage = () => {
   // ✅ Función segura para obtener ícono de estado
   const getStatusIcon = (status) => {
     if (!status) return <Clock className="w-4 h-4" />
-    
+
     switch (status) {
       case "completed":
         return <CheckCircle className="w-4 h-4" />
@@ -128,13 +113,18 @@ const ReviewsPage = () => {
   // ✅ Función segura para obtener etiqueta de estado
   const getStatusLabel = (status) => {
     if (!status) return "Desconocido"
-    
+
     switch (status) {
-      case "completed": return "Completado"
-      case "processing": return "Procesando"
-      case "reviewed": return "Revisado"
-      case "failed": return "Fallido"
-      default: return status
+      case "completed":
+        return "Completado"
+      case "processing":
+        return "Procesando"
+      case "reviewed":
+        return "Revisado"
+      case "failed":
+        return "Fallido"
+      default:
+        return status
     }
   }
 
@@ -166,12 +156,12 @@ const ReviewsPage = () => {
 
   // ✅ Validación segura para reviews array
   const safeReviews = Array.isArray(reviews) ? reviews : []
-  
-  // ✅ Validación segura para paginación
-  const safePagination = pagination && typeof pagination === 'object' ? pagination : {}
-  const totalPages = Number(safePagination.totalPages) || 1
 
-  if (loading && safeReviews.length === 0) {
+  // ✅ Validación segura para paginación
+  const safePagination = pagination && typeof pagination === "object" ? pagination : {}
+  const totalPages = Number(safePagination.pages) || 1
+
+  if (isLoading && safeReviews.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin text-primary mr-2" />
@@ -187,7 +177,7 @@ const ReviewsPage = () => {
           <h1 className="text-3xl font-bold text-gray-900">Mis Revisiones</h1>
           <p className="text-gray-600 mt-2">Gestiona y revisa todos los análisis de documentos</p>
         </div>
-        <Button onClick={() => navigate("/documents/upload")} className="flex items-center gap-2">
+        <Button onClick={() => navigate("/app/documents/upload")} className="flex items-center gap-2">
           <FileText className="w-4 h-4" />
           Nueva Revisión
         </Button>
@@ -263,7 +253,7 @@ const ReviewsPage = () => {
                 <Brain className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No hay revisiones disponibles</h3>
                 <p className="text-gray-600 mb-4">Comienza subiendo un documento para análisis</p>
-                <Button onClick={() => navigate("/documents/upload")} className="flex items-center gap-2">
+                <Button onClick={() => navigate("/app/documents/upload")} className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Subir Documento
                 </Button>
@@ -274,11 +264,12 @@ const ReviewsPage = () => {
           safeReviews.map((review) => {
             // ✅ Validaciones seguras para cada review
             if (!review) return null
-            
+
             const reviewId = review._id || review.id
             const reviewStatus = review.status || "unknown"
-            const document = review.document || {}
-            const analysis = review.analysis || {}
+            const documentId = review.documentId || {}
+            const document = typeof documentId === "object" ? documentId : {}
+            const scores = review.scores || {}
             const plagiarismCheck = review.plagiarismCheck || {}
 
             return (
@@ -305,74 +296,67 @@ const ReviewsPage = () => {
                         </div>
                         <div className="flex items-center">
                           <FileText className="w-4 h-4 mr-1" />
-                          {document.type || "Tipo no especificado"}
+                          {document.category || "Tipo no especificado"}
                         </div>
-                        {analysis.overallScore !== undefined && (
+                        {review.overallScore !== undefined && (
                           <div className="flex items-center">
                             <TrendingUp className="w-4 h-4 mr-1" />
-                            <span className={getScoreColor(analysis.overallScore)}>
-                              {analysis.overallScore}% puntuación
+                            <span className={getScoreColor(review.overallScore)}>
+                              {review.overallScore}% puntuación
                             </span>
                           </div>
                         )}
                       </div>
 
                       {/* Métricas de análisis */}
-                      {analysis && (
+                      {scores && Object.keys(scores).length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                           <div className="text-center p-3 bg-gray-50 rounded">
-                            <div className={`text-lg font-bold ${getScoreColor(analysis.grammarScore || 0)}`}>
-                              {analysis.grammarScore || 0}%
+                            <div className={`text-lg font-bold ${getScoreColor(scores.grammar || 0)}`}>
+                              {scores.grammar || 0}%
                             </div>
                             <div className="text-xs text-gray-600">Gramática</div>
                           </div>
                           <div className="text-center p-3 bg-gray-50 rounded">
-                            <div className={`text-lg font-bold ${getScoreColor(analysis.coherenceScore || 0)}`}>
-                              {analysis.coherenceScore || 0}%
+                            <div className={`text-lg font-bold ${getScoreColor(scores.coherence || 0)}`}>
+                              {scores.coherence || 0}%
                             </div>
                             <div className="text-xs text-gray-600">Coherencia</div>
                           </div>
                           <div className="text-center p-3 bg-gray-50 rounded">
-                            <div className={`text-lg font-bold ${getScoreColor(analysis.styleScore || 0)}`}>
-                              {analysis.styleScore || 0}%
+                            <div className={`text-lg font-bold ${getScoreColor(scores.style || 0)}`}>
+                              {scores.style || 0}%
                             </div>
                             <div className="text-xs text-gray-600">Estilo</div>
                           </div>
                           <div className="text-center p-3 bg-gray-50 rounded">
-                            <div className={`text-lg font-bold ${getSimilarityColor(plagiarismCheck.similarityPercentage || 0)}`}>
-                              {plagiarismCheck.similarityPercentage || 0}%
+                            <div className={`text-lg font-bold ${getSimilarityColor(plagiarismCheck.similarity || 0)}`}>
+                              {plagiarismCheck.similarity || 0}%
                             </div>
                             <div className="text-xs text-gray-600">Similitud</div>
                           </div>
                         </div>
                       )}
 
-                      {/* Retroalimentación del profesor */}
-                      {review.teacherFeedback && (
+                      {/* Resumen de análisis */}
+                      {review.summary && (
                         <div className="bg-blue-50 p-3 rounded mb-4">
                           <p className="text-sm text-blue-800">
-                            <strong>Retroalimentación:</strong>{" "}
-                            {review.teacherFeedback.length > 150 
-                              ? `${review.teacherFeedback.substring(0, 150)}...`
-                              : review.teacherFeedback
-                            }
+                            <strong>Resumen:</strong> {review.summary.totalIssues || 0} problemas encontrados
+                            {review.summary.criticalIssues > 0 && ` (${review.summary.criticalIssues} críticos)`}
                           </p>
                         </div>
                       )}
                     </div>
 
                     <div className="flex flex-col gap-2 min-w-[140px]">
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleViewReview(reviewId)}
-                        className="flex items-center gap-1"
-                      >
+                      <Button size="sm" onClick={() => handleViewReview(reviewId)} className="flex items-center gap-1">
                         <Eye className="w-4 h-4" />
                         Ver Detalles
                       </Button>
 
                       {/* ✅ Validación segura para permisos de eliminación */}
-                      {(user?.role === "admin" || document.author === user?.email) && (
+                      {(user?.role === "admin" || document.userId === user?._id) && (
                         <Button
                           size="sm"
                           variant="outline"
@@ -405,7 +389,7 @@ const ReviewsPage = () => {
           </Button>
 
           <div className="flex gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((page) => (
               <Button
                 key={page}
                 variant={currentPage === page ? "default" : "outline"}

@@ -32,19 +32,19 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
+
     // No establecer Content-Type para FormData, axios lo hace automáticamente
     if (!(config.data instanceof FormData)) {
       config.headers["Content-Type"] = "application/json"
     }
-    
+
     console.log("🔵 Configuración de request:", {
       url: config.url,
       method: config.method,
       hasToken: !!token,
-      hasFormData: config.data instanceof FormData
+      hasFormData: config.data instanceof FormData,
     })
-    
+
     return config
   },
   (error) => {
@@ -59,7 +59,7 @@ api.interceptors.response.use(
     console.log("✅ Response exitoso:", {
       url: response.config.url,
       status: response.status,
-      data: response.data
+      data: response.data,
     })
     return response
   },
@@ -74,7 +74,7 @@ api.interceptors.response.use(
       url,
       status,
       message,
-      responseData
+      responseData,
     })
 
     // 🔐 Manejo seguro de errores 401
@@ -96,7 +96,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error)
-  }
+  },
 )
 
 // Auth API - ✅ Solo hace las peticiones, NO guarda tokens
@@ -105,7 +105,7 @@ export const authAPI = {
   register: (userData) => api.post("/auth/register", userData),
   logout: () => api.post("/auth/logout"),
   getCurrentUser: () => api.get("/auth/me"),
-  
+
   // ✅ AGREGADO: Funciones para perfil y contraseña
   updateProfile: (profileData) => api.put("/auth/profile", profileData),
   changePassword: (passwordData) => api.put("/auth/password", passwordData),
@@ -118,7 +118,7 @@ export const usersAPI = {
   updateUser: (id, data) => api.put(`/users/${id}`, data),
   deleteUser: (id) => api.delete(`/users/${id}`),
   getUserStatistics: (id) => api.get(`/users/${id}/statistics`),
-  
+
   // ✅ AGREGADO: Alternativa para funciones de perfil (si prefieres esta ruta)
   updateUserProfile: (id, profileData) => api.put(`/users/${id}/profile`, profileData),
   changeUserPassword: (id, passwordData) => api.put(`/users/${id}/password`, passwordData),
@@ -130,14 +130,14 @@ export const documentsAPI = {
   getDocumentById: (id) => api.get(`/documents/${id}`),
   uploadDocument: (formData) => {
     console.log("📤 Subiendo documento a endpoint: /documents")
-    
+
     // Verificar contenido del FormData
-    for (let [key, value] of formData.entries()) {
+    for (const [key, value] of formData.entries()) {
       if (value instanceof File) {
         console.log(`   ${key}:`, value.name, value.type, value.size)
       }
     }
-    
+
     return api.post("/documents", formData, {
       timeout: 120000,
     })
@@ -150,10 +150,10 @@ export const documentsAPI = {
 export const getDocumentFile = (filename) => {
   const token = getToken()
   return axios.get(`${API_URL}/documents/file/${filename}`, {
-    responseType: 'blob',
+    responseType: "blob",
     headers: {
-      'Authorization': `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   })
 }
 
@@ -163,6 +163,7 @@ export const reviewsAPI = {
   getReviewById: (id) => api.get(`/reviews/${id}`),
   createReview: (documentId) => api.post(`/reviews/${documentId}`),
   addFeedback: (id, feedback) => api.put(`/reviews/${id}/feedback`, feedback),
+  deleteReview: (id) => api.delete(`/reviews/${id}`),
 }
 
 // AI API
@@ -185,9 +186,10 @@ export const statisticsAPI = {
 export const profileAPI = {
   updateProfile: (profileData) => api.put("/auth/profile", profileData),
   changePassword: (passwordData) => api.put("/auth/password", passwordData),
-  uploadAvatar: (formData) => api.post("/auth/avatar", formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  uploadAvatar: (formData) =>
+    api.post("/auth/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
 }
 
 export default api

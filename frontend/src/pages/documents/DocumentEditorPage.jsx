@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux"
 import { DocumentTextIcon, CloudArrowUpIcon, SparklesIcon } from "@heroicons/react/24/outline"
 import AIToolbar from "../../components/ai/AIToolbar"
 import ChatBot from "../../components/ai/ChatBot"
-import { fetchDocument, updateDocument } from "../../store/slices/documentsSlice"
+import { fetchDocumentById, updateDocument } from "../../store/slices/documentsSlice"
 
 function DocumentEditorPage() {
   const { id } = useParams()
@@ -24,7 +24,7 @@ function DocumentEditorPage() {
 
   useEffect(() => {
     if (id && id !== "new") {
-      dispatch(fetchDocument(id))
+      dispatch(fetchDocumentById(id))
     }
   }, [id, dispatch])
 
@@ -48,7 +48,7 @@ function DocumentEditorPage() {
 
   const handleSave = async (isAutoSave = false) => {
     if (!title.trim()) return
-
+  
     setIsSaving(true)
     try {
       const documentData = {
@@ -56,13 +56,21 @@ function DocumentEditorPage() {
         content,
         ...(id === "new" ? {} : { id }),
       }
-
-      await dispatch(updateDocument(documentData)).unwrap()
-      setLastSaved(new Date())
-
+  
+      // Cambia esta línea para enviar { id, data }
       if (id === "new") {
-        // Redirect to the new document's edit page
-        navigate(`/documents/${documentData.id}/edit`, { replace: true })
+        // Para nuevo documento, no hay id todavía
+        await dispatch(updateDocument({ data: documentData })).unwrap()
+      } else {
+        // Para documento existente
+        await dispatch(updateDocument({ id, data: documentData })).unwrap()
+      }
+      
+      setLastSaved(new Date())
+  
+      if (id === "new") {
+        // Esto probablemente también necesite ajustarse
+        navigate(`/documents/${documentData.id}`, { replace: true })
       }
     } catch (error) {
       console.error("Error saving document:", error)
@@ -96,7 +104,7 @@ function DocumentEditorPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => navigate("/documents")}
+              onClick={() => navigate(`/app/documents`)}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               ← Volver
