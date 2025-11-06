@@ -1,12 +1,13 @@
 {
-  "name": "ReviDocUC",
+  "name": "revidocuc",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "tests": "cypress open"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -96,9 +97,27 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cypress": "^15.6.0",
+    "mocha": "^11.7.5",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
-  }
+  },
+  "description": "**Plataforma colaborativa de revisión automática de escritura académica con Inteligencia Artificial y flujos automatizados.**",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JosueLm7/ReviDoc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JosueLm7/ReviDoc/issues"
+  },
+  "homepage": "https://github.com/JosueLm7/ReviDoc#readme"
 }

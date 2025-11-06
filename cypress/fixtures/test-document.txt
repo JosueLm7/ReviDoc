@@ -1,0 +1,11 @@
+Este es un documento de prueba para verificar el análisis de texto con la herramienta ReviDoc.
+
+El documento contiene múltiples párrafos para permitir un análisis más detallado y exhaustivo de la estructura, gramática y contenido del texto académico.
+
+Este documento de prueba incluye:
+- Párrafos bien estructurados
+- Puntuación correcta
+- Vocabulario académico
+- Referencias y estructura lógica
+
+El propósito de este documento es servir como base para pruebas de funcionalidad en la plataforma.
