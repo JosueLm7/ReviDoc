@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const Document = require("../backend/models/Document"); // Ajusta la ruta si es necesario
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://revidoc-backend.onrender.com";
 
 async function updateDocuments() {
   await mongoose.connect("mongodb+srv://JosueLm7:2xuaJJErVN9faE0F@revidocuc.t8lo6ej.mongodb.net/?retryWrites=true&w=majority&appName=ReviDocUC"); // Cambia el nombre de tu BD

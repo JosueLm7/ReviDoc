@@ -77,7 +77,7 @@ JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 JWT_EXPIRE=7d
 
 # API Configuration
-API_BASE_URL=http://localhost:5000/api
+API_BASE_URL=https://revidoc-backend.onrender.com/api
 FRONTEND_URL=http://localhost:3000
 
 # n8n Configuration
@@ -151,7 +151,7 @@ else
 fi
 
 # Check Backend API
-if curl -f http://localhost:5000/api/health > /dev/null 2>&1; then
+if curl -f https://revidoc-backend.onrender.com/api/health > /dev/null 2>&1; then
     print_success "Backend API is running"
 else
     print_warning "Backend API is not responding yet (may still be starting)"
@@ -177,7 +177,7 @@ echo "🎉 Setup completed!"
 echo ""
 echo "📋 Service URLs:"
 echo "   Frontend:     http://localhost:3000"
-echo "   Backend API:  http://localhost:5000"
+echo "   Backend API:  https://revidoc-backend.onrender.com"
 echo "   n8n:          http://localhost:5678"
 echo "   MongoDB:      mongodb://localhost:27017"
 echo ""

@@ -24,7 +24,7 @@ const logger = require("./utils/logger")
 const app = express()
 
 app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' http://localhost:3000")
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://revidocuc.vercel.app")
   next()
 })
 
@@ -62,7 +62,7 @@ app.use(compression())
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.NODE_ENV === "production" ? ["https://yourdomain.com"] : ["http://localhost:3000"],
+    origin: process.env.NODE_ENV === "production" ? ["https://revidocuc.vercel.app"] : ["http://localhost:3000"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],

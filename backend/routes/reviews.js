@@ -3,9 +3,9 @@ const Review = require("../models/Review")
 const Document = require("../models/Document")
 const { authenticate, authorize } = require("../middleware/auth")
 const { validateObjectId, validatePagination } = require("../middleware/validation")
-const { analyzeText } = require("../services/aiService")
 const logger = require("../utils/logger")
 const processReviewAsync = require("../services/processReviewAsync") // Declare the variable before using it
+const { sendReviewToN8N } = require("../services/n8nService");
 
 const router = express.Router()
 
@@ -14,74 +14,73 @@ const router = express.Router()
 // @access  Private
 router.post("/:documentId", authenticate, validateObjectId("documentId"), async (req, res) => {
   try {
-    const document = await Document.findById(req.params.documentId)
+    const document = await Document.findById(req.params.documentId);
 
     if (!document) {
-      return res.status(404).json({
-        success: false,
-        message: "Documento no encontrado",
-      })
+      return res.status(404).json({ success: false, message: "Documento no encontrado" });
     }
 
-    // Check if user owns the document or is admin/teacher
     if (
       req.user.role !== "admin" &&
       req.user.role !== "teacher" &&
       document.userId.toString() !== req.user._id.toString()
     ) {
-      return res.status(403).json({
-        success: false,
-        message: "No tienes permisos para revisar este documento",
-      })
+      return res.status(403).json({ success: false, message: "No tienes permisos para revisar este documento" });
     }
 
-    // Check if document already has a pending review
     const existingReview = await Review.findOne({
       documentId: req.params.documentId,
       status: { $in: ["pending", "processing"] },
-    })
+    });
 
     if (existingReview) {
       return res.status(400).json({
         success: false,
         message: "El documento ya tiene una revisión en proceso",
-      })
+      });
     }
 
-    // Create new review
     const review = new Review({
       documentId: req.params.documentId,
       userId: req.user._id,
       status: "pending",
       aiAnalysis: {
-        model: "openai-gpt-4",
+        model: "gemini",
         processingTime: 0,
         confidence: 0,
       },
-    })
+    });
 
-    await review.save()
+    await review.save();
 
-    // Update document status
-    document.status = "processing"
-    await document.save()
+    document.status = "processing";
+    await document.save();
 
-    // Start AI analysis (async)
-    processReviewAsync(review._id, document)
+    // ▶ START AI (async)
+    processReviewAsync(review._id, document);
 
-    logger.info(`Nueva revisión creada para documento: ${document.title}`)
+    // ▶🔥 SEND NOTIFICATION TO N8N
+    sendReviewToN8N({
+      reviewId: review._id,
+      documentId: document._id,
+      documentTitle: document.title,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      status: review.status,
+      createdAt: review.createdAt,
+      message: "Nueva revisión creada en el sistema",
+    });
+
+    logger.info(`Nueva revisión creada para documento: ${document.title}`);
 
     res.status(201).json({
       success: true,
       message: "Revisión iniciada exitosamente",
       data: { review },
-    })
+    });
   } catch (error) {
-    logger.error("Error creando revisión:", error)
-    res.status(500).json({
-      success: false,
-      message: "Error interno del servidor",
-    })
+    logger.error("Error creando revisión:", error);
+    res.status(500).json({ success: false, message: "Error interno del servidor" });
   }
 })
 

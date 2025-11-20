@@ -6,7 +6,7 @@ describe("Document Model", () => {
     const doc = new Document({
       title: "Test",
       filePath: "/tmp/test.pdf",
-      fileUrl: "http://localhost:5000/api/documents/file/test.pdf",
+      fileUrl: "https://revidoc-backend.onrender.com/api/documents/file/test.pdf",
       userId: "507f191e810c19729de860ea",
     })
     expect(doc.title).toBe("Test")

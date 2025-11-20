@@ -129,7 +129,7 @@ server {
 
     # Backend API
     location /api {
-        proxy_pass http://localhost:5000;
+        proxy_pass https://revidoc-backend.onrender.com;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
