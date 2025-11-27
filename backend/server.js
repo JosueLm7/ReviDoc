@@ -24,7 +24,15 @@ const logger = require("./utils/logger")
 const app = express()
 
 app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://revidocuc.vercel.app")
+  const allowedFrames =
+    process.env.NODE_ENV === "production"
+      ? "https://revidocuc.vercel.app"
+      : "http://localhost:3000"
+
+  res.setHeader(
+    "Content-Security-Policy",
+    `frame-ancestors 'self' ${allowedFrames}`
+  )
   next()
 })
 

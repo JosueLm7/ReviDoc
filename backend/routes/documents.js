@@ -76,7 +76,7 @@ router.post("/", authenticate, upload.array("documents", 10), validateDocumentUp
 
         const content = await extractTextFromFile(file.path, file.mimetype)
 
-        const publicUrl = `${process.env.NEXT_PUBLIC_API_URL || "https://revidoc-backend.onrender.com"}/api/documents/file/${path.basename(file.path)}`
+        const publicUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/documents/file/${path.basename(file.path)}`
 
         const document = new Document({
           title: title || file.originalname,

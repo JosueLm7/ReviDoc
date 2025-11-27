@@ -101,7 +101,7 @@ function DocumentViewPage() {
     if (documentData.fileUrl) {
       const fileUrl = documentData.fileUrl.startsWith("http")
         ? documentData.fileUrl
-        : `${process.env.REACT_APP_API_URL || "https://revidoc-backend.onrender.com"}${documentData.fileUrl}`
+        : `${process.env.REACT_APP_API_URL || "http://localhost:5000"}${documentData.fileUrl}`
 
       window.open(fileUrl, "_blank")
       return
@@ -420,7 +420,7 @@ function DocumentViewPage() {
                     <Tab.Panel className="px-8 py-6">
                       <div className="w-full h-[600px] bg-gray-100 rounded-lg overflow-hidden">
                         <iframe
-                          src={`${process.env.REACT_APP_API_URL || "https://revidoc-backend.onrender.com"}/api/documents/file/${documentData.fileUrl.split("/").pop()}`}
+                          src={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/documents/file/${documentData.fileUrl.split("/").pop()}`}
                           className="w-full h-full border-0"
                           title={`PDF: ${documentData.title}`}
                           type="application/pdf"

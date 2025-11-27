@@ -1,7 +1,7 @@
 import axios from "axios"
 import { toast } from "react-toastify"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://revidoc-backend.onrender.com/api"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
 // ✅ Función para obtener el token (solo lectura)
 export const getToken = () => {
