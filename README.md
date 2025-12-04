@@ -2,7 +2,7 @@
 
 **Plataforma colaborativa de revisión automática de escritura académica con Inteligencia Artificial y flujos automatizados.**  
 
-![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
+![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)
 ![Node](https://img.shields.io/badge/Node.js-18+-green.svg)
 ![React](https://img.shields.io/badge/React-18-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-yellow.svg)
@@ -193,9 +193,7 @@ Los flujos incluyen:
 - 📊 Generación de reportes  
 - 🔄 Sincronización de datos  
 
-Acceso: [http://localhost:5678](http://localhost:5678)  
-- Usuario: `admin`  
-- Contraseña: `password123`  
+Enlace del Webhook: [https://josuelm7.app.n8n.cloud/webhook/notificacion)
 
 ---
 
