@@ -28,7 +28,7 @@ services:
       # Custom environment variables for workflows
       - API_BASE_URL=${API_BASE_URL:-http://backend:5000/api}
       - API_TOKEN=${N8N_API_TOKEN}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3001}
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/home/node/.n8n/workflows:ro

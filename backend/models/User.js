@@ -74,8 +74,22 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
+    toJSON: { 
+      virtuals: true,
+      transform: function(doc, ret) {
+        delete ret.password
+        delete ret.__v
+        return ret
+      }
+    },
+    toObject: { 
+      virtuals: true,
+      transform: function(doc, ret) {
+        delete ret.password
+        delete ret.__v
+        return ret
+      }
+    },
   },
 )
 
@@ -91,16 +105,16 @@ userSchema.virtual("documents", {
   foreignField: "userId",
 })
 
-// Hash password before saving
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next()
+// ✅ CORREGIDO para Mongoose v7+: Hash password before saving
+userSchema.pre("save", async function () {
+  // Solo hashear si la contraseña fue modificada
+  if (!this.isModified("password")) return
 
   try {
     const salt = await bcrypt.genSalt(12)
     this.password = await bcrypt.hash(this.password, salt)
-    next()
   } catch (error) {
-    next(error)
+    throw new Error(`Error al hashear la contraseña: ${error.message}`)
   }
 })
 
@@ -127,5 +141,10 @@ userSchema.methods.updateLastLogin = function () {
   this.lastLogin = new Date()
   return this.save({ validateBeforeSave: false })
 }
+
+// Virtual para nombre completo
+userSchema.virtual("fullName").get(function () {
+  return this.name
+})
 
 module.exports = mongoose.model("User", userSchema)

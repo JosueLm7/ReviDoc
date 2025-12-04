@@ -103,8 +103,20 @@ const reviewSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
+    toJSON: { 
+      virtuals: true,
+      transform: function(doc, ret) {
+        delete ret.__v
+        return ret
+      }
+    },
+    toObject: { 
+      virtuals: true,
+      transform: function(doc, ret) {
+        delete ret.__v
+        return ret
+      }
+    },
   },
 )
 
@@ -115,8 +127,8 @@ reviewSchema.index({ status: 1 })
 reviewSchema.index({ createdAt: -1 })
 reviewSchema.index({ overallScore: -1 })
 
-// Pre-save middleware to calculate summary
-reviewSchema.pre("save", function (next) {
+// ✅ CORREGIDO: Pre-save middleware to calculate summary (Mongoose v7+)
+reviewSchema.pre("save", function () {
   if (this.isModified("issues")) {
     this.summary.totalIssues = this.issues.length
     this.summary.criticalIssues = this.issues.filter((issue) => issue.severity === "critical").length
@@ -127,8 +139,6 @@ reviewSchema.pre("save", function (next) {
     const scoreValues = Object.values(this.scores)
     this.overallScore = scoreValues.reduce((sum, score) => sum + score, 0) / scoreValues.length
   }
-
-  next()
 })
 
 module.exports = mongoose.model("Review", reviewSchema)

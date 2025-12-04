@@ -27,7 +27,7 @@ app.use((req, res, next) => {
   const allowedFrames =
     process.env.NODE_ENV === "production"
       ? "https://revidocuc.vercel.app"
-      : "http://localhost:3000"
+      : "http://localhost:3001"
 
   res.setHeader(
     "Content-Security-Policy",
@@ -70,7 +70,7 @@ app.use(compression())
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.NODE_ENV === "production" ? ["https://revidocuc.vercel.app"] : ["http://localhost:3000"],
+    origin: process.env.NODE_ENV === "production" ? ["https://revidocuc.vercel.app"] : ["http://localhost:3001"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],

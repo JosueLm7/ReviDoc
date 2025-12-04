@@ -115,8 +115,8 @@ npm run dev
 
 ## 🌐 Acceso a los Servicios
 
-- **Frontend** → [http://localhost:3000](http://localhost:3000)  
-- **Backend API** → [http://localhost:5000](http://localhost:5000)  
+- **Frontend** → [http://localhost:3001](http://localhost:3001)  
+- **Backend API** → [http://localhost:5001](http://localhost:5001)  
 - **n8n Automation** → [http://localhost:5678](http://localhost:5678)  
 - **MongoDB** → `localhost:27017`  
 

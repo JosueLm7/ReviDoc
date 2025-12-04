@@ -34,7 +34,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/auth/register",
+							"raw": "http://localhost:5001/api/auth/register",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -74,7 +74,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/auth/login",
+							"raw": "http://localhost:5001/api/auth/login",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -123,7 +123,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/auth/me",
+							"raw": "http://localhost:5001/api/auth/me",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -154,7 +154,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/auth/logout",
+							"raw": "http://localhost:5001/api/auth/logout",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -235,7 +235,7 @@
 							]
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/documents",
+							"raw": "http://localhost:5001/api/documents",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -265,7 +265,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/documents?page=1&limit=10&sort=-createdAt&status=pending",
+							"raw": "http://localhost:5001/api/documents?page=1&limit=10&sort=-createdAt&status=pending",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -313,7 +313,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/documents/68f15c2bd41d211a4b8626ac",
+							"raw": "http://localhost:5001/api/documents/68f15c2bd41d211a4b8626ac",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -353,7 +353,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/documents/68f15c2bd41d211a4b8626ac",
+							"raw": "http://localhost:5001/api/documents/68f15c2bd41d211a4b8626ac",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -384,7 +384,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/documents/file/SEM9_DiseÃ±oweb-1760648234774-212631725.pdf",
+							"raw": "http://localhost:5001/api/documents/file/SEM9_DiseÃ±oweb-1760648234774-212631725.pdf",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -421,7 +421,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/reviews/68f15c2bd41d211a4b8626ac",
+							"raw": "http://localhost:5001/api/reviews/68f15c2bd41d211a4b8626ac",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -452,7 +452,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/reviews?page=1&limit=10&sort=-createdAt&status=completed",
+							"raw": "http://localhost:5001/api/reviews?page=1&limit=10&sort=-createdAt&status=completed",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -500,7 +500,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/reviews/68f16be20d8540fc1381b1e2",
+							"raw": "http://localhost:5001/api/reviews/68f16be20d8540fc1381b1e2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -540,7 +540,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/reviews/68f16be20d8540fc1381b1e2/feedback",
+							"raw": "http://localhost:5001/api/reviews/68f16be20d8540fc1381b1e2/feedback",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -577,7 +577,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/statistics/dashboard",
+							"raw": "http://localhost:5001/api/statistics/dashboard",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -608,7 +608,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/statistics/trends?days=30",
+							"raw": "http://localhost:5001/api/statistics/trends?days=30",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -645,7 +645,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/statistics/users",
+							"raw": "http://localhost:5001/api/statistics/users",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -685,7 +685,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/statistics/generate",
+							"raw": "http://localhost:5001/api/statistics/generate",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -730,7 +730,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/ai/analyze",
+							"raw": "http://localhost:5001/api/ai/analyze",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -770,7 +770,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/ai/plagiarism",
+							"raw": "http://localhost:5001/api/ai/plagiarism",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -810,7 +810,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/ai/suggestions",
+							"raw": "http://localhost:5001/api/ai/suggestions",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -841,7 +841,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/ai/models",
+							"raw": "http://localhost:5001/api/ai/models",
 							"protocol": "http",
 							"host": [
 								"localhost"

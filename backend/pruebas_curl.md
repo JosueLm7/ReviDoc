@@ -12,7 +12,7 @@ Aquí tienes ejemplos de cómo interactuar con tu API usando `curl`. Asegúrate 
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/auth/register \
+curl -X POST http://localhost:5001/api/auth/register \
 -H "Content-Type: application/json" \
 -d '{
   "name": "Juan Perez",
@@ -56,7 +56,7 @@ curl -X POST http://localhost:5000/api/auth/register \
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST http://localhost:5001/api/auth/login \
 -H "Content-Type: application/json" \
 -d '{
   "email": "juan@ejemplo.com",
@@ -89,7 +89,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 
 **Comando:**
 \`\`\`bash
-curl -X GET http://localhost:5000/api/auth/me \
+curl -X GET http://localhost:5001/api/auth/me \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -131,7 +131,7 @@ curl -X GET http://localhost:5000/api/auth/me \
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/auth/logout \
+curl -X POST http://localhost:5001/api/auth/logout \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -153,7 +153,7 @@ curl -X POST http://localhost:5000/api/auth/logout \
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/documents \
+curl -X POST http://localhost:5001/api/documents \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -F "documents=@/ruta/al/archivo.pdf" \
 -F "title=Mi Ensayo Académico" \
@@ -177,7 +177,7 @@ curl -X POST http://localhost:5000/api/documents \
         "title": "Mi Ensayo Académico",
         "description": "Ensayo sobre inteligencia artificial",
         "originalFileName": "archivo.pdf",
-        "fileUrl": "http://localhost:5000/api/documents/file/archivo-1234567890.pdf",
+        "fileUrl": "http://localhost:5001/api/documents/file/archivo-1234567890.pdf",
         "fileSize": 245678,
         "fileType": "pdf",
         "category": "essay",
@@ -207,7 +207,7 @@ curl -X POST http://localhost:5000/api/documents \
 
 **Comando:**
 \`\`\`bash
-curl -X GET "http://localhost:5000/api/documents?page=1&limit=10&sort=-createdAt&status=pending" \
+curl -X GET "http://localhost:5001/api/documents?page=1&limit=10&sort=-createdAt&status=pending" \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -221,7 +221,7 @@ curl -X GET "http://localhost:5000/api/documents?page=1&limit=10&sort=-createdAt
         "_id": "507f191e810c19729de860ea",
         "title": "Mi Ensayo Académico",
         "description": "Ensayo sobre inteligencia artificial",
-        "fileUrl": "http://localhost:5000/api/documents/file/archivo-1234567890.pdf",
+        "fileUrl": "http://localhost:5001/api/documents/file/archivo-1234567890.pdf",
         "fileSize": 245678,
         "fileType": "pdf",
         "category": "essay",
@@ -253,7 +253,7 @@ curl -X GET "http://localhost:5000/api/documents?page=1&limit=10&sort=-createdAt
 
 **Comando:**
 \`\`\`bash
-curl -X GET http://localhost:5000/api/documents/507f191e810c19729de860ea \
+curl -X GET http://localhost:5001/api/documents/507f191e810c19729de860ea \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -268,7 +268,7 @@ curl -X GET http://localhost:5000/api/documents/507f191e810c19729de860ea \
       "description": "Ensayo sobre inteligencia artificial",
       "content": "Texto extraído del documento...",
       "originalFileName": "archivo.pdf",
-      "fileUrl": "http://localhost:5000/api/documents/file/archivo-1234567890.pdf",
+      "fileUrl": "http://localhost:5001/api/documents/file/archivo-1234567890.pdf",
       "fileSize": 245678,
       "fileType": "pdf",
       "category": "essay",
@@ -298,7 +298,7 @@ curl -X GET http://localhost:5000/api/documents/507f191e810c19729de860ea \
 
 **Comando:**
 \`\`\`bash
-curl -X PUT http://localhost:5000/api/documents/507f191e810c19729de860ea \
+curl -X PUT http://localhost:5001/api/documents/507f191e810c19729de860ea \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -H "Content-Type: application/json" \
 -d '{
@@ -335,7 +335,7 @@ curl -X PUT http://localhost:5000/api/documents/507f191e810c19729de860ea \
 
 **Comando:**
 \`\`\`bash
-curl -X DELETE http://localhost:5000/api/documents/507f191e810c19729de860ea \
+curl -X DELETE http://localhost:5001/api/documents/507f191e810c19729de860ea \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -355,7 +355,7 @@ curl -X DELETE http://localhost:5000/api/documents/507f191e810c19729de860ea \
 
 **Comando:**
 \`\`\`bash
-curl -X GET http://localhost:5000/api/documents/file/archivo-1234567890.pdf \
+curl -X GET http://localhost:5001/api/documents/file/archivo-1234567890.pdf \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 --output documento_descargado.pdf
 \`\`\`
@@ -373,7 +373,7 @@ El archivo se descarga directamente con el tipo MIME apropiado (application/pdf,
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/reviews/507f191e810c19729de860ea \
+curl -X POST http://localhost:5001/api/reviews/507f191e810c19729de860ea \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -H "Content-Type: application/json"
 \`\`\`
@@ -424,7 +424,7 @@ curl -X POST http://localhost:5000/api/reviews/507f191e810c19729de860ea \
 
 **Comando:**
 \`\`\`bash
-curl -X GET "http://localhost:5000/api/reviews?page=1&limit=10&sort=-createdAt&status=completed" \
+curl -X GET "http://localhost:5001/api/reviews?page=1&limit=10&sort=-createdAt&status=completed" \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -484,7 +484,7 @@ curl -X GET "http://localhost:5000/api/reviews?page=1&limit=10&sort=-createdAt&s
 
 **Comando:**
 \`\`\`bash
-curl -X GET http://localhost:5000/api/reviews/507f1f77bcf86cd799439022 \
+curl -X GET http://localhost:5001/api/reviews/507f1f77bcf86cd799439022 \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -598,7 +598,7 @@ curl -X GET http://localhost:5000/api/reviews/507f1f77bcf86cd799439022 \
 
 **Comando:**
 \`\`\`bash
-curl -X PUT http://localhost:5000/api/reviews/507f1f77bcf86cd799439022/feedback \
+curl -X PUT http://localhost:5001/api/reviews/507f1f77bcf86cd799439022/feedback \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -H "Content-Type: application/json" \
 -d '{
@@ -637,7 +637,7 @@ curl -X PUT http://localhost:5000/api/reviews/507f1f77bcf86cd799439022/feedback 
 
 **Comando:**
 \`\`\`bash
-curl -X GET http://localhost:5000/api/statistics/dashboard \
+curl -X GET http://localhost:5001/api/statistics/dashboard \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -733,7 +733,7 @@ curl -X GET http://localhost:5000/api/statistics/dashboard \
 
 **Comando:**
 \`\`\`bash
-curl -X GET "http://localhost:5000/api/statistics/trends?days=30" \
+curl -X GET "http://localhost:5001/api/statistics/trends?days=30" \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -862,7 +862,7 @@ curl -X GET "http://localhost:5000/api/statistics/trends?days=30" \
 
 **Comando:**
 \`\`\`bash
-curl -X GET http://localhost:5000/api/statistics/users \
+curl -X GET http://localhost:5001/api/statistics/users \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -940,7 +940,7 @@ curl -X GET http://localhost:5000/api/statistics/users \
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/statistics/generate \
+curl -X POST http://localhost:5001/api/statistics/generate \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -H "Content-Type: application/json" \
 -d '{
@@ -967,7 +967,7 @@ curl -X POST http://localhost:5000/api/statistics/generate \
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/ai/analyze \
+curl -X POST http://localhost:5001/api/ai/analyze \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -H "Content-Type: application/json" \
 -d '{
@@ -1031,7 +1031,7 @@ curl -X POST http://localhost:5000/api/ai/analyze \
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/ai/plagiarism \
+curl -X POST http://localhost:5001/api/ai/plagiarism \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -H "Content-Type: application/json" \
 -d '{
@@ -1098,7 +1098,7 @@ curl -X POST http://localhost:5000/api/ai/plagiarism \
 
 **Comando:**
 \`\`\`bash
-curl -X POST http://localhost:5000/api/ai/suggestions \
+curl -X POST http://localhost:5001/api/ai/suggestions \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
 -H "Content-Type: application/json" \
 -d '{
@@ -1180,7 +1180,7 @@ curl -X POST http://localhost:5000/api/ai/suggestions \
 
 **Comando:**
 \`\`\`bash
-curl -X GET http://localhost:5000/api/ai/models \
+curl -X GET http://localhost:5001/api/ai/models \
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 \`\`\`
 
@@ -1323,4 +1323,4 @@ MONGODB_URI=mongodb://localhost:27017/academic-review
 JWT_SECRET=tu_secreto_jwt_muy_seguro
 JWT_EXPIRE=7d
 MAX_FILE_SIZE=10485760
-NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=http://localhost:5001

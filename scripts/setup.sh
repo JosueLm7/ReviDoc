@@ -77,8 +77,8 @@ JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 JWT_EXPIRE=7d
 
 # API Configuration
-API_BASE_URL=http://localhost:5000/api
-FRONTEND_URL=http://localhost:3000
+API_BASE_URL=http://localhost:5001/api
+FRONTEND_URL=http://localhost:3001
 
 # n8n Configuration
 N8N_USER=admin
@@ -151,14 +151,14 @@ else
 fi
 
 # Check Backend API
-if curl -f http://localhost:5000/api/health > /dev/null 2>&1; then
+if curl -f http://localhost:5001/api/health > /dev/null 2>&1; then
     print_success "Backend API is running"
 else
     print_warning "Backend API is not responding yet (may still be starting)"
 fi
 
 # Check Frontend
-if curl -f http://localhost:3000 > /dev/null 2>&1; then
+if curl -f http://localhost:3001 > /dev/null 2>&1; then
     print_success "Frontend is running"
 else
     print_warning "Frontend is not responding yet (may still be starting)"
@@ -176,8 +176,8 @@ echo ""
 echo "🎉 Setup completed!"
 echo ""
 echo "📋 Service URLs:"
-echo "   Frontend:     http://localhost:3000"
-echo "   Backend API:  http://localhost:5000"
+echo "   Frontend:     http://localhost:3001"
+echo "   Backend API:  http://localhost:5001"
 echo "   n8n:          http://localhost:5678"
 echo "   MongoDB:      mongodb://localhost:27017"
 echo ""
@@ -188,7 +188,7 @@ echo "📝 Next Steps:"
 echo "   1. Update environment variables in .env, backend/.env, and frontend/.env"
 echo "   2. Configure your AI API keys (OpenAI, Hugging Face)"
 echo "   3. Set up email configuration for notifications"
-echo "   4. Access the application at http://localhost:3000"
+echo "   4. Access the application at http://localhost:3001"
 echo "   5. Access n8n at http://localhost:5678 to configure workflows"
 echo ""
 echo "🔧 Useful Commands:"
